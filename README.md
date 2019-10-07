@@ -32,8 +32,8 @@ The contents of the Wikipedia page will be put in “wikipedia_listfile.txt” f
 ```sh
 $ python3 telescreen.py -dir ./test/ -w 20
 ```
- -dir: Path to the local directory containing the slides
- -w: Slides refresh time. Delay time (in seconds) between changing the slides
+  - -dir: Path to the local directory containing the slides
+  - -w: Slides refresh time. Delay time (in seconds) between changing the slides
 
 ### License and attributions
 
