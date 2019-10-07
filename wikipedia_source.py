@@ -16,10 +16,11 @@ This file is part of Telescreen: A slideshow script for the WikiMUC
     along with Telescreen. If not, see <https://www.gnu.org/licenses/>.
 """
 import logging
+from datetime import datetime
 import requests
 import configs
 
-def get():
+def get_lastrev():
     """
     Returns the content of the latest revision of the "configs.wikipedia_list_page" page
     which has been edited by a whitelisted user
@@ -41,7 +42,8 @@ def get():
     revisions = data["query"]["pages"][pageid]["revisions"]
     for i, rev in enumerate(revisions):
         if rev['user'] in configs.whitelist_users:
-            return rev['*']
+            timestamp = datetime.strptime(rev['timestamp'], "%Y-%m-%dT%H:%M:%SZ")
+            return rev['*'], timestamp
         else:
             logging.debug("User %s is NOT whitelisted!", rev['user'])
 

@@ -16,11 +16,11 @@ This file is part of Telescreen: A slideshow script for the WikiMUC
     along with Telescreen. If not, see <https://www.gnu.org/licenses/>.
 """
 
-
-#import sys
 import os
 import time
 import logging
+from datetime import datetime
+from datetime import timedelta
 import wget
 import configs
 import wikipedia_source
@@ -30,30 +30,39 @@ class Slides:
     """
     Slideshow class
     """
-    start_time = time.time()
     browser = None
     def __init__(self):
         self.list = []
         self.timestamp = 0.0
+        self.wikipedia_timestamp = datetime.min
         logging.basicConfig(filename='telescreen.log', level=logging.DEBUG)
-        configs.downloads_directory = configs.working_directory + "/cache"
-        if not os.path.isdir(configs.downloads_directory):
-            os.mkdir(configs.downloads_directory)
+
+        configs.wikipedia_cache = configs.working_directory + "/wp_cache"
+        configs.lists_cache = configs.working_directory + "/cache"
+        configs.wikipedia_listfile = configs.wikipedia_cache + '/wikipedia_listfile.txt'
+
+        if not os.path.isdir(configs.wikipedia_cache):
+            os.mkdir(configs.wikipedia_cache)
+        if not os.path.isdir(configs.lists_cache):
+            os.mkdir(configs.lists_cache)
 
     def update_slides(self):
         """
         update the "list" by:
-        cleaning the download cache directory
+        cleaning the download cache directories
         put the content of the wikipedia page in a local text file
         generate the list from the files in the local directory
         """
         now = time.time()
         if (now - self.timestamp) > configs.cache_lifetime:
-            cleanup_directory(configs.downloads_directory)
-            update_wikipedia_listfile()
+            self.update_wikipedia()
+            cleanup_directory(configs.lists_cache)
             local_paths = local_file_paths(configs.working_directory)
+            print(local_paths)
+            local_paths.remove(os.path.abspath(configs.wikipedia_listfile))
             logging.debug('Updating slides from: %s', configs.working_directory)
-            self.list = generate_urls(local_paths)
+            locallist = generate_urls(local_paths)
+            self.list = cache_images(locallist, configs.lists_cache)
             self.timestamp = now
 
     def play(self):
@@ -67,31 +76,19 @@ class Slides:
                 logging.warning("Couldn't load the url: %s", str(exc))
             time.sleep(configs.slides_refresh_time)
 
-#    def update_script(self):
-#        now = time.time()
-#        if (now - self.start_time) > configs.script_lifetime:
-#            self.browser.close()
-#            #TODO: git clone the master branch
-#            logging.debug('Time now=' + str(now))
-#            logging.debug('Restarting the Telescreen!')
-#            os.execl(sys.executable, *([sys.executable] + sys.argv))
-
-def update_wikipedia_listfile():
-    """
-    get the content of the wikipedia page and put in inside a text file
-    """
-    local_listfile = configs.working_directory + '/wikipedia_listfile.txt'
-    context = wikipedia_source.get()
-    file = open(local_listfile, "w")
-    file.write(context)
-    file.close()
-
-    if os.path.isfile(local_listfile):
-        if os.path.getsize(local_listfile) > 0:
-            logging.debug('Wikipedia page is downloaded!')
-    else:
-        logging.error("Couldn't write the %s to the disk!", local_listfile)
-
+    def update_wikipedia(self):
+        """
+        Checks if the wikipedia page have been updates, cleanup and cache
+        """
+        context, timestamp = wikipedia_source.get_lastrev()
+        if timestamp - self.wikipedia_timestamp > timedelta():
+            cleanup_directory(configs.wikipedia_cache)
+            update_wikipedia_listfile(context)
+            wikipedia_list = parse_txt_file(configs.wikipedia_listfile)
+            self.list += cache_images(wikipedia_list, configs.wikipedia_cache)
+        else:
+            wikipedia_list = parse_txt_file(configs.wikipedia_listfile)
+            self.list += remove_images(wikipedia_list)
 
 
 
@@ -103,7 +100,7 @@ def local_file_paths(input_dir='.'):
     paths = []
     for root, dirs, files in os.walk(input_dir, topdown=True):
         for file in sorted(files):
-            if file.endswith(('jpg', 'png', 'gif', 'htm', 'html', 'txt')):
+            if file.endswith(configs.extensions_img+configs.extensions_web+configs.extensions_list):
                 path = os.path.abspath(os.path.join(root, file))
                 paths.append(path)
     return paths
@@ -117,37 +114,70 @@ def generate_urls(paths):
     """
     urls = []
     for path in paths:
-        if path.endswith(('jpg', 'png', 'gif', 'htm', 'html')):
+        if path.endswith(configs.extensions_img + configs.extensions_web):
             urls.append('file://' + path)
         elif path.endswith(('txt')):
-            urls += urls_in_local_txt_file(path)
+            urls += parse_txt_file(path)
     return urls
 
 
 
-def urls_in_local_txt_file(txtfile_path):
+def parse_txt_file(file_path):
     """
     reads a local .txt file and downloads the images to
     the cache directory or returns the urls in the file
     """
     urls = []
-    txt_file = open(txtfile_path, "r")
+    txt_file = open(file_path, "r")
     txtfile_lines = txt_file.readlines()
     for line in txtfile_lines:
         new_url = line.replace('*', '').strip()
-        logging.info(txtfile_path + ': New slide found: ' + new_url)
-        if new_url.endswith(('jpeg', 'jpg', 'png', 'gif')):
-            try:
-                filename = os.path.basename(new_url)
-                local_path = configs.downloads_directory + '/' + filename
-                wget.download(new_url, out=local_path)
-                urls.append('file://' + os.path.abspath(local_path))
-            except Exception as excp:
-                logging.error(str(excp) + ' ' + new_url)
-                urls.append(new_url)
-        else:
-            urls.append(new_url)
+        logging.info(file_path + ': New slide found: ' + new_url)
+        urls.append(new_url)
     return urls
+
+
+def cache_images(urls, path):
+    """
+    checks for the images in the URLs and tries to download them
+    """
+    for url in urls:
+        if url.endswith(configs.extensions_img):
+            try:
+                filename = os.path.basename(url)
+                local_path = path + '/' + filename
+                wget.download(url, out=local_path)
+                urls.append('file://' + os.path.abspath(local_path))
+                urls.remove(url)
+            except Exception as excp:
+                logging.error(str(excp) + ' ' + url)
+    return urls
+
+
+def remove_images(urls):
+    """
+   removes the images in the from the URLs (already cached!)
+    """
+    for url in urls:
+        if url.endswith(configs.extensions_img):
+            urls.remove(url)
+
+    return urls
+
+def update_wikipedia_listfile(context):
+    """
+    get the content of the wikipedia page and put in inside a text file
+    """
+
+    file = open(configs.wikipedia_listfile, "w")
+    file.write(context)
+    file.close()
+
+    if os.path.isfile(configs.wikipedia_listfile):
+        if os.path.getsize(configs.wikipedia_listfile) > 0:
+            logging.debug('Wikipedia page is downloaded!')
+    else:
+        logging.error("Couldn't write the %s to the disk!", configs.wikipedia_listfile)
 
 
 def cleanup_directory(path):

@@ -16,13 +16,6 @@ This file is part of Telescreen: A slideshow script for the WikiMUC
     along with Telescreen. If not, see <https://www.gnu.org/licenses/>.
 """
 
-## -----------Auto-Update-----------
-##automatically update the Telescreen from the master branch in the git repo
-#script_auto_update = True
-#
-##check for the new version of this script every *** seconds!
-#script_lifetime = 24 * 3600
-
 # -----------Slide Sources-----------
 #page which lists all the slide-urls
 wikipedia_list_page = "Benutzer:Meisam/test"
@@ -33,8 +26,21 @@ whitelist_users = ["Meisam"]
 
 working_directory = "./"
 
-#the files in this directory will be completely wiped each time the slide list is updated
-downloads_directory = working_directory + "/cache"
+#the files in this directory will be completely wiped each time the wikipedia page is updated
+wikipedia_cache = ""
+
+#content of the wikipedia page will be kept here
+wikipedia_listfile = ""
+
+#the files in this directory will be completely wiped each time the slides list is
+lists_cache = ""
+
+#will try to download these types if found in a URL
+extensions_img = ('jpeg', 'jpg', 'png', 'gif')
+#these types be shown directly
+extensions_web = ('htm', 'html')
+#list files be parsed line-by-line
+extensions_list = ('txt',)
 
 # -----------Slide configs-----------
 #Update the slides list every *** seconds

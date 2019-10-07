@@ -20,8 +20,6 @@ import os
 from selenium import webdriver
 import slides
 import configs
-#import pyautogui
-
 
 CLI_PARSER = argparse.ArgumentParser()
 CLI_PARSER.add_argument('-dir',
@@ -45,6 +43,5 @@ SLIDESHOW.browser = webdriver.Firefox()
 SLIDESHOW.browser.fullscreen_window()
 
 while True:
-#   SLIDESHOW.update_script()
     SLIDESHOW.update_slides()
     SLIDESHOW.play()
