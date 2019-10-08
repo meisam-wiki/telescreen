@@ -12,7 +12,7 @@ By default the images found in the URL lists will be locally cached.
 
 ### Installation
 Telescreen uses [Selenium](https://github.com/SeleniumHQ/selenium/) to control a local web browser. It also depends on the wget python package to download the images and cache them locally.
-You can simpley install these using the Python's package installer (pip) as:
+You can simply install these using the Python's package installer (pip) as:
 
 ```sh
 $ sudo apt-get install python3 pip3
@@ -42,8 +42,8 @@ $ python3 telescreen.py -dir ./test/ -w 20
 ### License and attributions
 
 * source: Telescreen source is available under the [GNU GPL v3+] (attributions: Meisam@wikimedia, MichaelSchoenitzer@wikimedia)
-* test slides: The copyright of each image in the ./test directory belongs to its author. Please refer to the ./test/README file for more information.
-* geckodriver: geckodriver is made available under the [Mozilla Public License].
+* test slides: The copyright of each image in the ./test directory belongs to its original author. Please refer to the ./test/README file for more information.
+* geckodriver: The geckodriver is made available under the [Mozilla Public License].
 
 [GNU GPL v3+]: https://www.gnu.org/licenses/quick-guide-gplv3.html
 [Mozilla Public License]: https://www.mozilla.org/en-US/MPL/2.0/
