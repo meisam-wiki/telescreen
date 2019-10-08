@@ -7,4 +7,5 @@ python:
 install:
   - pip3 install selenium wget
 script:
+  - python3 -V
   - python3 -m py_compile telescreen.py slides.py wikipedia_source.py
