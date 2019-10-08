@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.com/meisam-wiki/telescreen.svg?branch=master)](https://travis-ci.com/meisam-wiki/telescreen)
 ## Telescreen
 Slideshow for [WikiMUC](https://de.wikipedia.org/wiki/Wikipedia:WikiMUC)
 
@@ -11,6 +12,7 @@ By default the images found in the URL lists will be locally cached.
 
 ### Installation
 Telescreen uses [Selenium](https://github.com/SeleniumHQ/selenium/) to control a local web browser. It also depends on the wget python package to download the images and cache them locally.
+You can simpley install these using the Python's package installer (pip) as:
 
 ```sh
 $ sudo apt-get install python3 pip3
@@ -28,7 +30,7 @@ You can edit the configs.py and change the default parameters of Telescreen. Thi
 
 ### Adding slides
 You can add slides by either putting images/webpages in the working directory, creating a .txt file with each URL in a newline, or adding the URLs to a Wikipedia page by the whitelisted user accounts. (URLS are allowed to start with “*”) 
-The contents of the Wikipedia page will be put in “wikipedia_listfile.txt” file in the working directory.
+The contents of the Wikipedia page will be automatically put into the “wikipedia_listfile.txt” file in the working directory and parsed from there.
 
 ### Execution
 ```sh
