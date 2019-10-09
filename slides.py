@@ -41,10 +41,13 @@ class Slides:
         configs.lists_cache = configs.working_directory + "/cache"
         configs.wikipedia_listfile = configs.wikipedia_cache + '/wikipedia_listfile.txt'
 
+        #cleanup the directory and the temp files
         if not os.path.isdir(configs.wikipedia_cache):
             os.mkdir(configs.wikipedia_cache)
         if not os.path.isdir(configs.lists_cache):
             os.mkdir(configs.lists_cache)
+        if os.path.isfile(configs.wikipedia_listfile):
+            os.remove(os.path.abspath(configs.wikipedia_listfile))
 
     def update_slides(self):
         """
@@ -55,15 +58,13 @@ class Slides:
         """
         now = time.time()
         if (now - self.timestamp) > configs.cache_lifetime:
+            self.list = []
             self.update_wikipedia()
             cleanup_directory(configs.lists_cache)
             local_paths = local_file_paths(configs.working_directory)
-            print(local_paths)
-            if os.path.isfile(configs.wikipedia_listfile):
-                local_paths.remove(os.path.abspath(configs.wikipedia_listfile))
             logging.debug('Updating slides from: %s', configs.working_directory)
             locallist = generate_urls(local_paths)
-            self.list = cache_images(locallist, configs.lists_cache)
+            self.list += cache_images(locallist, configs.lists_cache)
             self.timestamp = now
 
     def play(self):
@@ -81,18 +82,19 @@ class Slides:
         """
         Checks if the wikipedia page have been updates, cleanup and cache
         """
-        context, timestamp = wikipedia_source.get_lastrev()
-        #Newer revision is found!
-        if timestamp - self.wikipedia_timestamp > timedelta():
+        online_context, online_timestamp = wikipedia_source.get_lastrev()
+        #newer revision has been found!
+        if online_timestamp - self.wikipedia_timestamp > timedelta():
             cleanup_directory(configs.wikipedia_cache)
-            update_wikipedia_listfile(context)
+            update_wikipedia_listfile(online_context)
             wikipedia_list = parse_txt_file(configs.wikipedia_listfile)
             self.list += cache_images(wikipedia_list, configs.wikipedia_cache)
         else:
-            #invalid rev
-            if context == '':
+            #invalid online revision
+            if online_context == '':
                 cleanup_directory(configs.wikipedia_cache)
             #old revision is still valid
+            #(Will reuse the cached images, only add the links to the list)
             else:
                 wikipedia_list = parse_txt_file(configs.wikipedia_listfile)
                 self.list += remove_images(wikipedia_list)
@@ -102,7 +104,7 @@ class Slides:
 def local_file_paths(input_dir='.'):
     """
     returns a list of the absolute paths to the images/html/txt files in the input directory
-    and all of its subdirectories
+    and all of its subdirectories expect the wikipedia list file
     """
     paths = []
     for root, dirs, files in os.walk(input_dir, topdown=True):
@@ -110,6 +112,9 @@ def local_file_paths(input_dir='.'):
             if file.endswith(configs.extensions_img+configs.extensions_web+configs.extensions_list):
                 path = os.path.abspath(os.path.join(root, file))
                 paths.append(path)
+
+    if os.path.abspath(configs.wikipedia_listfile) in paths:
+        paths.remove(os.path.abspath(configs.wikipedia_listfile))
     return paths
 
 
@@ -147,6 +152,7 @@ def parse_txt_file(file_path):
 def cache_images(urls, path):
     """
     checks for the images in the URLs and tries to download them
+    returns the local path to the files and all the rest of the URLs
     """
     for url in urls:
         if url.endswith(configs.extensions_img):

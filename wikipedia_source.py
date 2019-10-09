@@ -41,14 +41,18 @@ def get_lastrev():
     result = requests.get(url, params=query)
     data = result.json()
     pageid = list(data["query"]["pages"].keys())[0]
-    revisions = data["query"]["pages"][pageid]["revisions"]
-    for i, rev in enumerate(revisions):
-        if rev['user'] in configs.whitelist_users:
-            timestamp = datetime.strptime(rev['timestamp'], "%Y-%m-%dT%H:%M:%SZ")
-            return rev['*'], timestamp
-        else:
-            logging.debug("User %s is NOT whitelisted!", rev['user'])
+    if pageid != '-1':
+        revisions = data["query"]["pages"][pageid]["revisions"]
+        for i, rev in enumerate(revisions):
+            if rev['user'] in configs.whitelist_users:
+                timestamp = datetime.strptime(rev['timestamp'], "%Y-%m-%dT%H:%M:%SZ")
+                return rev['*'], timestamp
+            else:
+                logging.debug("User %s is NOT whitelisted!", rev['user'])
 
-    logging.warning("Couldn't find any revisions from the Wikipedia page \"%s\""
-                    "which is edited by the whitelisted users!", configs.wikipedia_list_page)
+        logging.warning("Couldn't find any revisions from the Wikipedia page \"%s\" "
+                        "which is edited by the whitelisted users!", configs.wikipedia_list_page)
+    else:
+        logging.warning("The Wikipedia page \"%s\" "
+                        "couldn't be found!", configs.wikipedia_list_page)
     return '', datetime.min
