@@ -59,7 +59,8 @@ class Slides:
             cleanup_directory(configs.lists_cache)
             local_paths = local_file_paths(configs.working_directory)
             print(local_paths)
-            local_paths.remove(os.path.abspath(configs.wikipedia_listfile))
+            if os.path.isfile(configs.wikipedia_listfile):
+                local_paths.remove(os.path.abspath(configs.wikipedia_listfile))
             logging.debug('Updating slides from: %s', configs.working_directory)
             locallist = generate_urls(local_paths)
             self.list = cache_images(locallist, configs.lists_cache)
@@ -81,14 +82,20 @@ class Slides:
         Checks if the wikipedia page have been updates, cleanup and cache
         """
         context, timestamp = wikipedia_source.get_lastrev()
+        #Newer revision is found!
         if timestamp - self.wikipedia_timestamp > timedelta():
             cleanup_directory(configs.wikipedia_cache)
             update_wikipedia_listfile(context)
             wikipedia_list = parse_txt_file(configs.wikipedia_listfile)
             self.list += cache_images(wikipedia_list, configs.wikipedia_cache)
         else:
-            wikipedia_list = parse_txt_file(configs.wikipedia_listfile)
-            self.list += remove_images(wikipedia_list)
+            #invalid rev
+            if context == '':
+                cleanup_directory(configs.wikipedia_cache)
+            #old revision is still valid
+            else:
+                wikipedia_list = parse_txt_file(configs.wikipedia_listfile)
+                self.list += remove_images(wikipedia_list)
 
 
 

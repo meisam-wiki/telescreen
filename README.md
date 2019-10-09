@@ -25,7 +25,7 @@ To use the Telescreen with a different browser please follow the instructions on
 
 ### Configurations
 You can edit the configs.py and change the default parameters of Telescreen. This includes the default:
-- directory of the slides, and slides cache
+- Directory of the slides, and slides cache
 - Address of the Wikipedia page containing the URLs and the whitelisted users allowed to modify the page
 - Cache lifetime
 - Slides refresh time
@@ -35,6 +35,11 @@ You can add slides by either putting images/webpages in the working directory, c
 The contents of the Wikipedia page will be automatically put into the “wikipedia_listfile.txt” file in the working directory and parsed from there.
 
 ### Execution
+```sh
+$ python3 telescreen.py
+```
+Runs the Telescreen with the default value for the parameters as defined in the configs.py
+
 ```sh
 $ python3 telescreen.py -dir ./test/ -w 20
 ```

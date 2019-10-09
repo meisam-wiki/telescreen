@@ -22,8 +22,10 @@ import configs
 
 def get_lastrev():
     """
-    Returns the content of the latest revision of the "configs.wikipedia_list_page" page
-    which has been edited by a whitelisted user
+    Returns:
+        1-content of the latest revision of the "configs.wikipedia_list_page" page
+        which has been edited by a whitelisted user
+        2-timestamp of that revision in datetime object format
     """
     url = "https://" + configs.wikipedia_lang + ".wikipedia.org/w/api.php"
     query = {
@@ -49,4 +51,4 @@ def get_lastrev():
 
     logging.warning("Couldn't find any revisions from the Wikipedia page \"%s\""
                     "which is edited by the whitelisted users!", configs.wikipedia_list_page)
-    return ''
+    return '', datetime.min
