@@ -19,7 +19,7 @@ $ sudo apt-get install python3 pip3
 $ pip3 install selenium wget
 ```
 In addition, the Telescreen (through the Selenium) requires a browser and its compatible webdriver to work.
-A tested version of the webdriver for the Firefox (geckodriver) has been included in the “./geckodriver/”. You have to extract the compressed binary for your OS and add it to your system path. To build the geckodriver for a different OS, please refer to the (geckodriver build manual)[https://firefox-source-docs.mozilla.org/testing/geckodriver/Building.html].
+A tested version of the webdriver for the Firefox (geckodriver) has been included in the “./geckodriver/”. You have to extract the compressed binary for your OS and add it to your system path. To build the geckodriver from the source for a different OS, please refer to the [geckodriver build manual](https://firefox-source-docs.mozilla.org/testing/geckodriver/Building.html).
 You can download the latest version of the geckodriver from [here](https://github.com/mozilla/geckodriver/releases/latest)!
 To use the Telescreen with a different browser please follow the instructions on the [Selenium guide page](https://pypi.org/project/selenium/).
 
