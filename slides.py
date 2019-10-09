@@ -35,7 +35,6 @@ class Slides:
         self.list = []
         self.timestamp = 0.0
         self.wikipedia_timestamp = datetime.min
-        logging.basicConfig(filename='telescreen.log', level=logging.DEBUG)
 
         configs.wikipedia_cache = configs.working_directory + "/wp_cache"
         configs.lists_cache = configs.working_directory + "/cache"
@@ -104,7 +103,7 @@ class Slides:
 def local_file_paths(input_dir='.'):
     """
     returns a list of the absolute paths to the images/html/txt files in the input directory
-    and all of its subdirectories expect the wikipedia list file
+    and all of its subdirectories except the wikipedia list file
     """
     paths = []
     for root, dirs, files in os.walk(input_dir, topdown=True):
@@ -152,7 +151,7 @@ def parse_txt_file(file_path):
 def cache_images(urls, path):
     """
     checks for the images in the URLs and tries to download them
-    returns the local path to the files and all the rest of the URLs
+    returns the local path to the downloaded files and all the rest of the URLs
     """
     for url in urls:
         if url.endswith(configs.extensions_img):

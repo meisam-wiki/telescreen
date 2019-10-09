@@ -15,6 +15,9 @@ This file is part of Telescreen: A slideshow script for the WikiMUC
     You should have received a copy of the GNU General Public License
     along with Telescreen. If not, see <https://www.gnu.org/licenses/>.
 """
+import logging
+
+logging.basicConfig(filename='telescreen.log', level=logging.DEBUG)
 
 # -----------Slide Sources-----------
 #page which lists all the slide-urls
