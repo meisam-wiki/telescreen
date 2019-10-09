@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.com/meisam-wiki/telescreen.svg?branch=master)](https://travis-ci.com/meisam-wiki/telescreen)
 ## Telescreen
-Slideshow for [WikiMUC](https://de.wikipedia.org/wiki/Wikipedia:WikiMUC)
+A Simple Slideshow for the [WikiMUC](https://de.wikipedia.org/wiki/Wikipedia:WikiMUC)
 
 ### Introduction
 Telescreen is a simple slideshow python script. It can display images and webpages from multiple sources including:
@@ -19,10 +19,9 @@ $ sudo apt-get install python3 pip3
 $ pip3 install selenium wget
 ```
 In addition, the Telescreen (through the Selenium) requires a browser and its compatible webdriver to work.
-A tested version of the webdriver for the Firefox (geckodriver) has been included in the “./geckodriver”. You have to extract the compressed binary for your OS and add it to your system path.
+A tested version of the webdriver for the Firefox (geckodriver) has been included in the “./geckodriver/”. You have to extract the compressed binary for your OS and add it to your system path. To build the geckodriver for a different OS, please refer to the (geckodriver build manual)[https://firefox-source-docs.mozilla.org/testing/geckodriver/Building.html].
 You can download the latest version of the geckodriver from [here](https://github.com/mozilla/geckodriver/releases/latest)!
-To use the Telescreen with a different browser please follow the instructions on the [guide page](https://pypi.org/project/selenium/).
-
+To use the Telescreen with a different browser please follow the instructions on the [Selenium guide page](https://pypi.org/project/selenium/).
 
 ### Configurations
 You can edit the configs.py and change the default parameters of Telescreen. This includes the default:
