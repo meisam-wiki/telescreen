@@ -46,6 +46,9 @@ $ python3 telescreen.py -dir ./test/ -w 20
   - -dir: Path to the local directory containing the slides
   - -w: Slides refresh time. Delay time (in seconds) between changing the slides
 
+### Troubleshooting
+By default, the Telescreen logs all the messages to “telescreen.log” file. You can use this file for monitoring the events or for its troubleshooting. The logging behavior of the Telescreen can be tweaked in the configs.py file.
+
 ### License and attributions
 
 * source: Telescreen source is available under the [GNU GPL v3+] (attributions: Meisam@wikimedia, MichaelSchoenitzer@wikimedia)
