@@ -1,2 +1,3 @@
 * https://darksky.net/forecast/48.1521,11.5445/ca24/de
 * https://www.wikipedia.org
+* https://upload.wikimedia.org/wikipedia/commons/0/0d/WikiMUC_Garamond2.jpg

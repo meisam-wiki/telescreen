@@ -36,14 +36,18 @@ class Slides:
         self.timestamp = 0.0
         self.wikipedia_timestamp = datetime.min
 
-        configs.wikipedia_cache = configs.working_directory + "/wp_cache"
-        configs.lists_cache = configs.working_directory + "/cache"
+        configs.wikipedia_cache = configs.working_directory + "/cache/wp"
+        configs.lists_cache = configs.working_directory + "/cache/local"
         configs.wikipedia_listfile = configs.wikipedia_cache + '/wikipedia_listfile.txt'
 
         #cleanup the directory and the temp files
-        if not os.path.isdir(configs.wikipedia_cache):
+        if os.path.isdir(configs.wikipedia_cache):
+            cleanup_directory(configs.wikipedia_cache)
+        else:
             os.mkdir(configs.wikipedia_cache)
-        if not os.path.isdir(configs.lists_cache):
+        if os.path.isdir(configs.lists_cache):
+            cleanup_directory(configs.lists_cache)
+        else:
             os.mkdir(configs.lists_cache)
         if os.path.isfile(configs.wikipedia_listfile):
             os.remove(os.path.abspath(configs.wikipedia_listfile))
@@ -58,13 +62,18 @@ class Slides:
         now = time.time()
         if (now - self.timestamp) > configs.cache_lifetime:
             self.list = []
-            self.update_wikipedia()
+            self.update_from_wikipedia()
             cleanup_directory(configs.lists_cache)
-            local_paths = local_file_paths(configs.working_directory)
+            local_slides = local_slide_paths(configs.working_directory)
             logging.debug('Updating slides from: %s', configs.working_directory)
-            locallist = generate_urls(local_paths)
-            self.list += cache_images(locallist, configs.lists_cache)
+            self.list += local_urls(local_slides)
+            list_files = local_list_paths(configs.working_directory)
+            web_address = read_list_files(list_files)
+            cache_images(web_address, configs.lists_cache)
+            cached_files = local_slide_paths(configs.lists_cache)
+            self.list += local_urls(cached_files)
             self.timestamp = now
+            logging.debug('Final slide list: %s', self.list)
 
     def play(self):
         """
@@ -77,9 +86,9 @@ class Slides:
                 logging.warning("Couldn't load the url: %s", str(exc))
             time.sleep(configs.slides_refresh_time)
 
-    def update_wikipedia(self):
+    def update_from_wikipedia(self):
         """
-        Checks if the wikipedia page have been updates, cleanup and cache
+        Checks if the wikipedia page have been updated, cleanup and cache
         """
         online_context, online_timestamp = wikipedia_source.get_lastrev()
         #newer revision has been found!
@@ -87,28 +96,51 @@ class Slides:
             cleanup_directory(configs.wikipedia_cache)
             update_wikipedia_listfile(online_context)
             wikipedia_list = parse_txt_file(configs.wikipedia_listfile)
-            self.list += cache_images(wikipedia_list, configs.wikipedia_cache)
+            cache_images(wikipedia_list, configs.wikipedia_cache)
+            self.list += web_links(wikipedia_list)
+            logging.debug('Wikipedia list renewed!')
+            logging.debug('local timestamp: %s, New timestamp: %s', 
+                          self.wikipedia_timestamp, online_timestamp)
+            self.wikipedia_timestamp = online_timestamp
         else:
             #invalid online revision
             if online_context == '':
                 cleanup_directory(configs.wikipedia_cache)
+                logging.debug('Wikipedia list was empty!')
             #old revision is still valid
             #(Will reuse the cached images, only add the links to the list)
             else:
                 wikipedia_list = parse_txt_file(configs.wikipedia_listfile)
-                self.list += remove_images(wikipedia_list)
+                self.list += web_links(wikipedia_list)
+                logging.debug('Wikipedia list was still valid!')
 
 
 
-def local_file_paths(input_dir='.'):
+def local_slide_paths(input_dir='.'):
     """
-    returns a list of the absolute paths to the images/html/txt files in the input directory
+    returns a list of the absolute paths to the images/html files in the input directory
+    and all of its subdirectories excluding caches
+    """
+    paths = []
+    for root, dirs, files in os.walk(input_dir, topdown=True):
+        for file in sorted(files):
+            if (not configs.wikipedia_cache in file) and (not configs.lists_cache in file):
+                if file.endswith(configs.extensions_img+configs.extensions_web+configs.extensions_list):
+                    path = os.path.abspath(os.path.join(root, file))
+                    paths.append(path)
+
+    return paths
+
+
+def local_list_paths(input_dir='.'):
+    """
+    returns a list of the absolute paths to the txt files in the input directory
     and all of its subdirectories except the wikipedia list file
     """
     paths = []
     for root, dirs, files in os.walk(input_dir, topdown=True):
         for file in sorted(files):
-            if file.endswith(configs.extensions_img+configs.extensions_web+configs.extensions_list):
+            if file.endswith(configs.extensions_list):
                 path = os.path.abspath(os.path.join(root, file))
                 paths.append(path)
 
@@ -117,18 +149,15 @@ def local_file_paths(input_dir='.'):
     return paths
 
 
-
-def generate_urls(paths):
+def local_urls(absolute_file_paths):
     """
     generates a list of the urls from the list of the absolute paths
-    to the local files. The text files are parsed as 1-url per line
+    to the local files.
     """
     urls = []
-    for path in paths:
+    for path in absolute_file_paths:
         if path.endswith(configs.extensions_img + configs.extensions_web):
             urls.append('file://' + path)
-        elif path.endswith(('txt')):
-            urls += parse_txt_file(path)
     return urls
 
 
@@ -151,7 +180,6 @@ def parse_txt_file(file_path):
 def cache_images(urls, path):
     """
     checks for the images in the URLs and tries to download them
-    returns the local path to the downloaded files and all the rest of the URLs
     """
     for url in urls:
         if url.endswith(configs.extensions_img):
@@ -159,16 +187,23 @@ def cache_images(urls, path):
                 filename = os.path.basename(url)
                 local_path = path + '/' + filename
                 wget.download(url, out=local_path)
-                urls.append('file://' + os.path.abspath(local_path))
-                urls.remove(url)
+                logging.debug('Downloaded %s to %s', url, local_path)
             except Exception as excp:
                 logging.error(str(excp) + ' ' + url)
+
+def read_list_files(list_files):
+    """
+    parses all the text files and returns the content
+    """
+    urls = []
+    for file in list_files:
+        urls += parse_txt_file(file)
+
     return urls
 
-
-def remove_images(urls):
+def web_links(urls):
     """
-   removes the images in the from the URLs (already cached!)
+   removes the image URLs and returns only the web links
     """
     for url in urls:
         if url.endswith(configs.extensions_img):
@@ -178,7 +213,7 @@ def remove_images(urls):
 
 def update_wikipedia_listfile(context):
     """
-    get the content of the wikipedia page and put in inside a text file
+    gets the content of the wikipedia page and puts it inside a text file
     """
 
     file = open(configs.wikipedia_listfile, "w")
@@ -187,14 +222,14 @@ def update_wikipedia_listfile(context):
 
     if os.path.isfile(configs.wikipedia_listfile):
         if os.path.getsize(configs.wikipedia_listfile) > 0:
-            logging.debug('Wikipedia page is downloaded!')
+            logging.debug('Wikipedia page has been successfully downloaded!')
     else:
         logging.error("Couldn't write the %s to the disk!", configs.wikipedia_listfile)
 
 
 def cleanup_directory(path):
     """
-    removes all the files in the path directory
+    removes all the files in the directory
     """
     for file in os.listdir(path):
         os.remove(os.path.join(path, file))
