@@ -37,6 +37,8 @@ def get_lastrev():
         "rvprop": "timestamp|ids|user|content",
         "rvlimit": "max"
     }
+    logging.debug('Updating slides from the Wikipedia page: %s:%s',
+                  configs.wikipedia_lang, configs.wikipedia_list_page)
 
     result = requests.get(url, params=query)
     data = result.json()

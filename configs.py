@@ -30,20 +30,20 @@ whitelist_users = ["Meisam"]
 working_directory = "./"
 
 #the files in this directory will be completely wiped each time the wikipedia page is updated
-wikipedia_cache = ""
+wikipedia_list_cache = ""
 
 #content of the wikipedia page will be kept here
 wikipedia_listfile = ""
 
 #the files in this directory will be completely wiped each time the slides list is
-lists_cache = ""
+local_lists_cache = ""
 
 #will try to download these types if found in a URL
-extensions_img = ('jpeg', 'jpg', 'png', 'gif')
+img_extensions = ('jpeg', 'jpg', 'png', 'gif')
 #these types be shown directly
-extensions_web = ('htm', 'html')
+web_extensions = ('htm', 'html')
 #list files be parsed line-by-line
-extensions_list = ('txt',)
+list_extensions = ('txt',)
 
 # -----------Slide configs-----------
 #Update the slides list every *** seconds

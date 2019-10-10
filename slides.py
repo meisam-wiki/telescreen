@@ -36,48 +36,50 @@ class Slides:
         self.timestamp = 0.0
         self.wikipedia_timestamp = datetime.min
 
-        configs.wikipedia_cache = configs.working_directory + "/cache/wp"
-        configs.lists_cache = configs.working_directory + "/cache/local"
-        configs.wikipedia_listfile = configs.wikipedia_cache + '/wikipedia_listfile.txt'
+        configs.wikipedia_list_cache = configs.working_directory + "/cache/wp"
+        configs.local_lists_cache = configs.working_directory + "/cache/local"
+        configs.wikipedia_listfile = configs.wikipedia_list_cache + '/wikipedia_listfile.txt'
 
-        #cleanup the directory and the temp files
-        if os.path.isdir(configs.wikipedia_cache):
-            cleanup_directory(configs.wikipedia_cache)
+        #cleanup the cache directories and the temp files
+        if os.path.isdir(configs.wikipedia_list_cache):
+            cleanup_directory(configs.wikipedia_list_cache)
         else:
-            os.mkdir(configs.wikipedia_cache)
-        if os.path.isdir(configs.lists_cache):
-            cleanup_directory(configs.lists_cache)
+            os.mkdir(configs.wikipedia_list_cache)
+        if os.path.isdir(configs.local_lists_cache):
+            cleanup_directory(configs.local_lists_cache)
         else:
-            os.mkdir(configs.lists_cache)
+            os.mkdir(configs.local_lists_cache)
         if os.path.isfile(configs.wikipedia_listfile):
             os.remove(os.path.abspath(configs.wikipedia_listfile))
 
     def update_slides(self):
         """
         update the "list" by:
-        cleaning the download cache directories
-        put the content of the wikipedia page in a local text file
-        generate the list from the files in the local directory
+            1-checking wikipedia page, caching images, adding URLs to list
+            2-reading local list files, caching the images, adding URLs to list
+            3-reading all the local and cached images and adding them to the list
         """
         now = time.time()
         if (now - self.timestamp) > configs.cache_lifetime:
             self.list = []
             self.update_from_wikipedia()
-            cleanup_directory(configs.lists_cache)
-            local_slides = local_slide_paths(configs.working_directory)
-            logging.debug('Updating slides from: %s', configs.working_directory)
-            self.list += local_urls(local_slides)
-            list_files = local_list_paths(configs.working_directory)
+
+            logging.debug('Updating slides from the local directory: %s', configs.working_directory)
+            cleanup_directory(configs.local_lists_cache)
+            list_files = local_lists_path(configs.working_directory)
             web_address = read_list_files(list_files)
-            cache_images(web_address, configs.lists_cache)
-            cached_files = local_slide_paths(configs.lists_cache)
-            self.list += local_urls(cached_files)
+            cache_images(web_address, configs.local_lists_cache)
+            self.list += web_links(web_address)
+
+            local_slides = local_files_path(configs.working_directory)
+            self.list += local_urls(local_slides)
+
             self.timestamp = now
-            logging.debug('Final slide list: %s', self.list)
+            logging.debug('Final slides list: %s', self.list)
 
     def play(self):
         """
-        loads the slide urls from the list one-by-one
+        loads the slide urls from the list one-by-one into the browser
         """
         for url in self.list:
             try:
@@ -89,50 +91,46 @@ class Slides:
     def update_from_wikipedia(self):
         """
         Checks if the wikipedia page have been updated, cleanup and cache
+        otherwise, just add the URLs to the list
         """
         online_context, online_timestamp = wikipedia_source.get_lastrev()
-        #newer revision has been found!
+
         if online_timestamp - self.wikipedia_timestamp > timedelta():
-            cleanup_directory(configs.wikipedia_cache)
+            logging.debug('New Wikipedia list was found!')
+            logging.debug('local wp timestamp: %s, New wp timestamp: %s',
+                          self.wikipedia_timestamp, online_timestamp)
+            cleanup_directory(configs.wikipedia_list_cache)
             update_wikipedia_listfile(online_context)
             wikipedia_list = parse_txt_file(configs.wikipedia_listfile)
-            cache_images(wikipedia_list, configs.wikipedia_cache)
+            cache_images(wikipedia_list, configs.wikipedia_list_cache)
             self.list += web_links(wikipedia_list)
-            logging.debug('Wikipedia list renewed!')
-            logging.debug('local timestamp: %s, New timestamp: %s', 
-                          self.wikipedia_timestamp, online_timestamp)
             self.wikipedia_timestamp = online_timestamp
         else:
-            #invalid online revision
             if online_context == '':
-                cleanup_directory(configs.wikipedia_cache)
+                cleanup_directory(configs.wikipedia_list_cache)
                 logging.debug('Wikipedia list was empty!')
-            #old revision is still valid
-            #(Will reuse the cached images, only add the links to the list)
             else:
+                logging.debug('Wikipedia list was still valid!')
                 wikipedia_list = parse_txt_file(configs.wikipedia_listfile)
                 self.list += web_links(wikipedia_list)
-                logging.debug('Wikipedia list was still valid!')
 
 
-
-def local_slide_paths(input_dir='.'):
+def local_files_path(input_dir='.'):
     """
-    returns a list of the absolute paths to the images/html files in the input directory
-    and all of its subdirectories excluding caches
+    returns a list of the absolute paths to the slide files in the
+    input directory and all of its subdirectories
     """
     paths = []
     for root, dirs, files in os.walk(input_dir, topdown=True):
         for file in sorted(files):
-            if (not configs.wikipedia_cache in file) and (not configs.lists_cache in file):
-                if file.endswith(configs.extensions_img+configs.extensions_web+configs.extensions_list):
-                    path = os.path.abspath(os.path.join(root, file))
-                    paths.append(path)
+            if file.endswith(configs.img_extensions+configs.web_extensions):
+                path = os.path.abspath(os.path.join(root, file))
+                paths.append(path)
 
     return paths
 
 
-def local_list_paths(input_dir='.'):
+def local_lists_path(input_dir='.'):
     """
     returns a list of the absolute paths to the txt files in the input directory
     and all of its subdirectories except the wikipedia list file
@@ -140,7 +138,7 @@ def local_list_paths(input_dir='.'):
     paths = []
     for root, dirs, files in os.walk(input_dir, topdown=True):
         for file in sorted(files):
-            if file.endswith(configs.extensions_list):
+            if file.endswith(configs.list_extensions):
                 path = os.path.abspath(os.path.join(root, file))
                 paths.append(path)
 
@@ -152,11 +150,11 @@ def local_list_paths(input_dir='.'):
 def local_urls(absolute_file_paths):
     """
     generates a list of the urls from the list of the absolute paths
-    to the local files.
+    to the local files
     """
     urls = []
     for path in absolute_file_paths:
-        if path.endswith(configs.extensions_img + configs.extensions_web):
+        if path.endswith(configs.img_extensions + configs.web_extensions):
             urls.append('file://' + path)
     return urls
 
@@ -164,28 +162,27 @@ def local_urls(absolute_file_paths):
 
 def parse_txt_file(file_path):
     """
-    reads a local .txt file and downloads the images to
-    the cache directory or returns the urls in the file
+    reads a local .txt file and returns the urls in the file
     """
     urls = []
     txt_file = open(file_path, "r")
     txtfile_lines = txt_file.readlines()
     for line in txtfile_lines:
         new_url = line.replace('*', '').strip()
-        logging.info(file_path + ': New slide found: ' + new_url)
+        logging.info(file_path + ': includes: ' + new_url)
         urls.append(new_url)
     return urls
 
 
 def cache_images(urls, path):
     """
-    checks for the images in the URLs and tries to download them
+    Downloads the images in the URLs to the 'path' directory
     """
     for url in urls:
-        if url.endswith(configs.extensions_img):
+        if url.endswith(configs.img_extensions):
+            filename = os.path.basename(url)
+            local_path = path + '/' + filename
             try:
-                filename = os.path.basename(url)
-                local_path = path + '/' + filename
                 wget.download(url, out=local_path)
                 logging.debug('Downloaded %s to %s', url, local_path)
             except Exception as excp:
@@ -206,7 +203,7 @@ def web_links(urls):
    removes the image URLs and returns only the web links
     """
     for url in urls:
-        if url.endswith(configs.extensions_img):
+        if url.endswith(configs.img_extensions):
             urls.remove(url)
 
     return urls
