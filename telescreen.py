@@ -39,6 +39,11 @@ CLI_PARSER.add_argument(
     dest="slides_refresh_time",
     default=30,
 )
+CLI_PARSER.add_argument(
+    "--headless-test",
+	action="store_true",
+    help="Just check the generated list of the slides"
+)
 ARGS = CLI_PARSER.parse_args()
 
 configs.slides_refresh_time = ARGS.slides_refresh_time
@@ -46,6 +51,13 @@ configs.working_directory = ARGS.working_directory
 
 
 SLIDESHOW = Slides()
+
+if ARGS.headless:
+    return_code = 0
+    SLIDESHOW.update_slides()
+    return_code += ci_tests.test_list(SLIDESHOW.list)
+    sys.exit(return_code)
+
 SLIDESHOW.browser = webdriver.Firefox()
 SLIDESHOW.browser.fullscreen_window()
 

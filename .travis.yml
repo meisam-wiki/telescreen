@@ -8,4 +8,5 @@ install:
   - pip3 install selenium wget
 script:
   - python3 -V
-  - python3 -m py_compile telescreen.py slides.py wikipedia_source.py
+  - python3 -m py_compile ci_tests.py configs.py slides.py telescreen.py wikipedia_source.py
+  - python3 telescreen.py -dir ./test/ --headless-test

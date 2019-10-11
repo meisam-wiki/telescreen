@@ -39,16 +39,16 @@ class Slides:
         self.timestamp = 0.0
         self.wikipedia_timestamp = datetime.min
 
-        configs.cache_folder = configs.working_directory + "/cache"
-        configs.wikipedia_list_cache = configs.working_directory + "/cache/wp"
-        configs.local_lists_cache = configs.working_directory + "/cache/local"
+        cache_folder = configs.working_directory + "/cache"
+        configs.local_lists_cache = cache_folder + "/local"
+        configs.wikipedia_list_cache = cache_folder + "/wp"
         configs.wikipedia_listfile = (
             configs.wikipedia_list_cache + "/wikipedia_listfile.txt"
         )
 
         # cleanup the cache directories and the temp files
-        if not os.path.isdir(configs.cache_folder):
-            os.mkdir(configs.cache_folder)
+        if not os.path.isdir(cache_folder):
+            os.mkdir(cache_folder)
         if os.path.isdir(configs.wikipedia_list_cache):
             cleanup_directory(configs.wikipedia_list_cache)
         else:
@@ -169,7 +169,7 @@ def local_urls(absolute_file_paths):
     urls = []
     for path in absolute_file_paths:
         if path.endswith(configs.img_extensions + configs.web_extensions):
-            urls.append("file://" + path)
+            urls.append("file://" + os.path.abspath(path))
     return urls
 
 
