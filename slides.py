@@ -146,7 +146,7 @@ def local_files_path(input_dir="."):
 def local_lists_path(input_dir="."):
     """
     returns a list of the absolute paths to the txt files in the input directory
-    and all of its subdirectories except the wikipedia list file
+    and all of its subdirectories
     """
     paths = []
     for root, dirs, files in os.walk(input_dir, topdown=True):
@@ -205,7 +205,7 @@ def cache_images(urls, path):
             except Exception as excp:
                 logging.error(str(excp) + " " + url)
             else:
-                new_urls.append(local_path)
+                new_urls += local_urls(local_path)
         else:
             new_urls.append(url)
     return new_urls
