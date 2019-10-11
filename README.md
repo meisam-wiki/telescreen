@@ -11,12 +11,12 @@ Telescreen is a simple slideshow python script. It can display images and webpag
 By default the images found in the URL lists will be locally cached.
 
 ### Installation
-Telescreen uses [Selenium](https://github.com/SeleniumHQ/selenium/) to control a local web browser. It also depends on the wget python package to download the images and cache them locally.
+Telescreen uses [Selenium](https://github.com/SeleniumHQ/selenium/) to control a local web browser. It also depends on the requests python package to load the wikipedia pages, and wget package to download the images and cache them locally.
 You can simply install these using the Python's package installer (pip) as:
 
 ```sh
 $ sudo apt-get install python3 pip3
-$ pip3 install selenium wget
+$ pip3 install selenium wget requests
 ```
 In addition, the Telescreen (through the Selenium) requires a browser and its compatible webdriver to work.
 A tested version of the webdriver for the Firefox (geckodriver) has been included in the “./geckodriver/”. You have to extract the compressed binary for your OS and add it to your system path. 

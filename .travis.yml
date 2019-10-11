@@ -5,7 +5,7 @@ python:
   - "3.6"
   - "3.7"
 install:
-  - pip3 install selenium wget
+  - pip3 install selenium wget requests
 script:
   - python3 -V
   - python3 -m py_compile ci_tests.py configs.py slides.py telescreen.py wikipedia_source.py
