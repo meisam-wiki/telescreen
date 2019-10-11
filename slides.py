@@ -137,7 +137,7 @@ def local_files_path(input_dir="."):
     """
     paths = []
     for root, dirs, files in os.walk(input_dir, topdown=True):
-        if Path(root) == configs.cache_folder:
+        if Path(root).match(str(configs.cache_folder)+'/*'):
             continue
         for file in sorted(files):
             if file.endswith(configs.img_extensions + configs.web_extensions):
@@ -210,7 +210,7 @@ def cache_images(urls, path):
             except Exception as excp:
                 logging.error(str(excp) + " " + url)
             else:
-                new_urls += local_urls(local_path)
+                new_urls += local_urls((local_path,))
         else:
             new_urls.append(url)
     return new_urls
