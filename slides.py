@@ -101,7 +101,7 @@ class Slides:
         Checks if the wikipedia page have been updated, cleanup and cache
         otherwise, just add the URLs to the list
         """
-        online_context, online_timestamp = wikipedia_source.get_lastrev()
+        online_content, online_timestamp = wikipedia_source.get_lastrev()
 
         if online_timestamp - self.wikipedia_timestamp > timedelta():
             logging.debug("New Wikipedia list was found!")
@@ -111,14 +111,14 @@ class Slides:
                 online_timestamp,
             )
             cleanup_directory(configs.wikipedia_list_cache)
-            self.wikipedia_list = parse_list(online_context.split(sep="\n"))
+            self.wikipedia_list = parse_list(online_content)
             self.wikipedia_list = cache_images(
                 self.wikipedia_list, configs.wikipedia_list_cache
             )
             self.list += self.wikipedia_list
             self.wikipedia_timestamp = online_timestamp
         else:
-            if online_context == "":
+            if online_content == "":
                 cleanup_directory(configs.wikipedia_list_cache)
                 logging.debug("Wikipedia list was empty!")
             else:
@@ -169,12 +169,12 @@ def local_urls(absolute_file_paths):
     return urls
 
 
-def parse_list(lines, name=""):
+def parse_list(text, name=""):
     """
-    reads a list of strings and extracts the URLs
+    reads a string and extracts the URLs
     """
     urls = []
-    for line in lines:
+    for line in text.splitlines():
         new_url = line.replace("*", "").strip()
         logging.info("%s: includes: %s", name, new_url)
         urls.append(new_url)
@@ -186,8 +186,8 @@ def parse_txt_file(file_path):
     reads a local .txt file and returns the urls in the file
     """
     with open(file_path, "r") as txt_file:
-        txtfile_lines = txt_file.readlines()
-    return parse_list(txtfile_lines, file_path)
+        content = txt_file.read()
+    return parse_list(content, file_path)
 
 
 def cache_images(urls, path):
