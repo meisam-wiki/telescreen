@@ -1,5 +1,5 @@
 """
-copyright: 2019 Meisam@wikimedia
+copyright: 2019 Meisam@wikimedia, MichaelSchoenitzer@wikimedia
 This file is part of Telescreen: A slideshow script for the WikiMUC
 
     Telescreen is free software: you can redistribute it and/or modify
@@ -35,9 +35,6 @@ cache_folder = ""
 # the images included in the wikipedia page will be cached here
 # the files in this directory will be completely wiped each time the wikipedia page is updated
 wikipedia_list_cache = ""
-
-# content of the wikipedia page will be kept here
-wikipedia_listfile = ""
 
 # the images included in the local list files will be cached here
 # directory will be completely wiped each time the slides list is updated

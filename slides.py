@@ -1,5 +1,5 @@
 """
-copyright: 2019 Meisam@wikimedia
+copyright: 2019 Meisam@wikimedia, MichaelSchoenitzer@wikimedia
 This file is part of Telescreen: A slideshow script for the WikiMUC
 
     Telescreen is free software: you can redistribute it and/or modify
@@ -63,7 +63,7 @@ class Slides:
         update the "list" by:
             1-checking wikipedia page, caching images, adding URLs to list
             2-reading local list files, caching the images, adding URLs to list
-            3-reading all the local and cached images and adding them to the list
+            3-reading the local files and adding them to the list
         """
         now = time.time()
         if (now - self.timestamp) > configs.cache_lifetime:
@@ -111,7 +111,9 @@ class Slides:
                 online_timestamp,
             )
             cleanup_directory(configs.wikipedia_list_cache)
-            self.wikipedia_list = parse_list(online_content)
+            self.wikipedia_list = parse_list(online_content,
+                                             configs.wikipedia_lang + ":" +
+                                             configs.wikipedia_list_page)
             self.wikipedia_list = cache_images(
                 self.wikipedia_list, configs.wikipedia_list_cache
             )
@@ -119,8 +121,10 @@ class Slides:
             self.wikipedia_timestamp = online_timestamp
         else:
             if online_content == "":
-                cleanup_directory(configs.wikipedia_list_cache)
                 logging.debug("Wikipedia list was empty!")
+                if self.wikipedia_list:
+                    self.list += self.wikipedia_list
+                    logging.debug("Local Wikipedia cache will be reused!")
             else:
                 logging.debug("Wikipedia list was still valid!")
                 self.list += self.wikipedia_list
@@ -129,7 +133,7 @@ class Slides:
 def local_files_path(input_dir="."):
     """
     returns a list of the absolute paths to the slide files in the
-    input directory and all of its subdirectories, excluding cache folders
+    input directory and all of its subdirectories, excluding the cache folder
     """
     paths = []
     for root, dirs, files in os.walk(input_dir, topdown=True):
@@ -193,6 +197,7 @@ def parse_txt_file(file_path):
 def cache_images(urls, path):
     """
     Downloads the images in the URLs to the 'path' directory
+    replaces the image URLs in the list with link to the local files
     """
     new_urls = []
     for url in urls:

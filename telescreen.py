@@ -1,5 +1,5 @@
 """
-copyright: 2019 Meisam@wikimedia
+copyright: 2019 Meisam@wikimedia, MichaelSchoenitzer@wikimedia
 This file is part of Telescreen: A slideshow script for the WikiMUC
 
     Telescreen is free software: you can redistribute it and/or modify

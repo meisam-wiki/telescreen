@@ -45,9 +45,14 @@ def get_lastrev():
         configs.wikipedia_lang,
         configs.wikipedia_list_page,
     )
+    try:
+        result = requests.get(url, params=query)
+        data = result.json()
+    except Exception as excp:
+        logging.error(str(excp) + " " + url)
+        logging.warning("Couldn't load the Wikipedia page!")
+        return "", datetime.min
 
-    result = requests.get(url, params=query)
-    data = result.json()
     pageid = list(data["query"]["pages"].keys())[0]
     if pageid != "-1":
         revisions = data["query"]["pages"][pageid]["revisions"]
