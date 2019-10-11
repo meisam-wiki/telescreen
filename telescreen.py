@@ -17,10 +17,12 @@ This file is part of Telescreen: A slideshow script for the WikiMUC
 """
 import argparse
 import os
+import sys
 
 from selenium import webdriver
 
 import configs
+import ci_tests
 from slides import Slides
 
 CLI_PARSER = argparse.ArgumentParser()
@@ -40,7 +42,7 @@ CLI_PARSER.add_argument(
     default=30,
 )
 CLI_PARSER.add_argument(
-    "--headless-test",
+    "--headless_test",
 	action="store_true",
     help="Just check the generated list of the slides"
 )
@@ -52,7 +54,7 @@ configs.working_directory = ARGS.working_directory
 
 SLIDESHOW = Slides()
 
-if ARGS.headless:
+if ARGS.headless_test:
     return_code = 0
     SLIDESHOW.update_slides()
     return_code += ci_tests.test_list(SLIDESHOW.list)

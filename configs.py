@@ -29,6 +29,9 @@ whitelist_users = ["Meisam"]
 
 working_directory = "./"
 
+# images will be cached here
+cache_folder = ""
+
 # the images included in the wikipedia page will be cached here
 # the files in this directory will be completely wiped each time the wikipedia page is updated
 wikipedia_list_cache = ""
