@@ -178,8 +178,8 @@ def parse_txt_file(file_path):
     reads a local .txt file and returns the urls in the file
     """
     urls = []
-    txt_file = open(file_path, "r")
-    txtfile_lines = txt_file.readlines()
+    with open(file_path, "r") as txt_file:
+        txtfile_lines = txt_file.readlines()
     for line in txtfile_lines:
         new_url = line.replace("*", "").strip()
         logging.info(file_path + ": includes: " + new_url)
@@ -229,9 +229,8 @@ def update_wikipedia_listfile(context):
     gets the content of the wikipedia page and puts it inside a text file
     """
 
-    file = open(configs.wikipedia_listfile, "w")
-    file.write(context)
-    file.close()
+    with open(configs.wikipedia_listfile, "w") as file:
+        file.write(context)
 
     if os.path.isfile(configs.wikipedia_listfile):
         if os.path.getsize(configs.wikipedia_listfile) > 0:
