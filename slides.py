@@ -39,6 +39,7 @@ class Slides:
         self.timestamp = 0.0
         self.wikipedia_timestamp = datetime.min
 
+        configs.cache_folder = configs.working_directory + "/cache"
         configs.wikipedia_list_cache = configs.working_directory + "/cache/wp"
         configs.local_lists_cache = configs.working_directory + "/cache/local"
         configs.wikipedia_listfile = (
@@ -46,6 +47,8 @@ class Slides:
         )
 
         # cleanup the cache directories and the temp files
+        if not os.path.isdir(configs.cache_folder):
+            os.mkdir(configs.cache_folder)
         if os.path.isdir(configs.wikipedia_list_cache):
             cleanup_directory(configs.wikipedia_list_cache)
         else:
