@@ -20,6 +20,7 @@ import logging
 import os
 import time
 from datetime import datetime, timedelta
+from pathlib import Path
 
 import wget
 
@@ -39,11 +40,12 @@ class Slides:
         self.timestamp = 0.0
         self.wikipedia_timestamp = datetime.min
 
-        configs.cache_folder = configs.working_directory + "/cache"
-        configs.wikipedia_list_cache = configs.working_directory + "/cache/wp"
-        configs.local_lists_cache = configs.working_directory + "/cache/local"
+        working_directory = Path(configs.working_directory)
+        configs.cache_folder = working_directory / "cache"
+        configs.wikipedia_list_cache = configs.cache_folder / "wp"
+        configs.local_lists_cache = configs.cache_folder / "local"
         configs.wikipedia_listfile = (
-            configs.wikipedia_list_cache + "/wikipedia_listfile.txt"
+            configs.wikipedia_list_cache / "wikipedia_listfile.txt"
         )
 
         # cleanup the cache directories and the temp files
@@ -182,7 +184,7 @@ def parse_txt_file(file_path):
         txtfile_lines = txt_file.readlines()
     for line in txtfile_lines:
         new_url = line.replace("*", "").strip()
-        logging.info(file_path + ": includes: " + new_url)
+        logging.info("%s: includes: %s", file_path, new_url)
         urls.append(new_url)
     return urls
 
@@ -194,7 +196,7 @@ def cache_images(urls, path):
     for url in urls:
         if url.endswith(configs.img_extensions):
             filename = os.path.basename(url)
-            local_path = path + "/" + filename
+            local_path = os.path.join(path, filename)
             try:
                 wget.download(url, out=local_path)
                 logging.debug("Downloaded %s to %s", url, local_path)
