@@ -17,8 +17,11 @@ This file is part of Telescreen: A slideshow script for the WikiMUC
 """
 import logging
 from datetime import datetime
+
 import requests
+
 import configs
+
 
 def get_lastrev():
     """
@@ -35,26 +38,33 @@ def get_lastrev():
         "list": "",
         "titles": configs.wikipedia_list_page,
         "rvprop": "timestamp|ids|user|content",
-        "rvlimit": "max"
+        "rvlimit": "max",
     }
-    logging.debug('Updating slides from the Wikipedia page: %s:%s',
-                  configs.wikipedia_lang, configs.wikipedia_list_page)
+    logging.debug(
+        "Updating slides from the Wikipedia page: %s:%s",
+        configs.wikipedia_lang,
+        configs.wikipedia_list_page,
+    )
 
     result = requests.get(url, params=query)
     data = result.json()
     pageid = list(data["query"]["pages"].keys())[0]
-    if pageid != '-1':
+    if pageid != "-1":
         revisions = data["query"]["pages"][pageid]["revisions"]
         for i, rev in enumerate(revisions):
-            if rev['user'] in configs.whitelist_users:
-                timestamp = datetime.strptime(rev['timestamp'], "%Y-%m-%dT%H:%M:%SZ")
-                return rev['*'], timestamp
+            if rev["user"] in configs.whitelist_users:
+                timestamp = datetime.strptime(rev["timestamp"], "%Y-%m-%dT%H:%M:%SZ")
+                return rev["*"], timestamp
             else:
-                logging.debug("User %s is NOT whitelisted!", rev['user'])
+                logging.debug("User %s is NOT whitelisted!", rev["user"])
 
-        logging.warning("Couldn't find any revisions from the Wikipedia page \"%s\" "
-                        "which is edited by the whitelisted users!", configs.wikipedia_list_page)
+        logging.warning(
+            'Couldn\'t find any revisions from the Wikipedia page "%s" '
+            "which is edited by the whitelisted users!",
+            configs.wikipedia_list_page,
+        )
     else:
-        logging.warning("The Wikipedia page \"%s\" "
-                        "couldn't be found!", configs.wikipedia_list_page)
-    return '', datetime.min
+        logging.warning(
+            'The Wikipedia page "%s" ' "couldn't be found!", configs.wikipedia_list_page
+        )
+    return "", datetime.min

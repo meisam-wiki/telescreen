@@ -17,21 +17,28 @@ This file is part of Telescreen: A slideshow script for the WikiMUC
 """
 import argparse
 import os
+
 from selenium import webdriver
-from slides import Slides
+
 import configs
+from slides import Slides
 
 CLI_PARSER = argparse.ArgumentParser()
-CLI_PARSER.add_argument('-dir',
-                        help='directory of images',
-                        nargs='?',
-                        dest='working_directory',
-                        default=os.getcwd())
-CLI_PARSER.add_argument('-w', '--wait',
-                        help='Waiting time between each slide update',
-                        type=int,
-                        dest='slides_refresh_time',
-                        default=30)
+CLI_PARSER.add_argument(
+    "-dir",
+    help="directory of images",
+    nargs="?",
+    dest="working_directory",
+    default=os.getcwd(),
+)
+CLI_PARSER.add_argument(
+    "-w",
+    "--wait",
+    help="Waiting time between each slide update",
+    type=int,
+    dest="slides_refresh_time",
+    default=30,
+)
 ARGS = CLI_PARSER.parse_args()
 
 configs.slides_refresh_time = ARGS.slides_refresh_time

@@ -16,12 +16,13 @@ This file is part of Telescreen: A slideshow script for the WikiMUC
     along with Telescreen. If not, see <https://www.gnu.org/licenses/>.
 """
 
+import logging
 import os
 import time
-import logging
-from datetime import datetime
-from datetime import timedelta
+from datetime import datetime, timedelta
+
 import wget
+
 import configs
 import wikipedia_source
 
@@ -30,7 +31,9 @@ class Slides:
     """
     Slideshow class
     """
+
     browser = None
+
     def __init__(self):
         self.list = []
         self.timestamp = 0.0
@@ -38,9 +41,11 @@ class Slides:
 
         configs.wikipedia_list_cache = configs.working_directory + "/cache/wp"
         configs.local_lists_cache = configs.working_directory + "/cache/local"
-        configs.wikipedia_listfile = configs.wikipedia_list_cache + '/wikipedia_listfile.txt'
+        configs.wikipedia_listfile = (
+            configs.wikipedia_list_cache + "/wikipedia_listfile.txt"
+        )
 
-        #cleanup the cache directories and the temp files
+        # cleanup the cache directories and the temp files
         if os.path.isdir(configs.wikipedia_list_cache):
             cleanup_directory(configs.wikipedia_list_cache)
         else:
@@ -64,7 +69,10 @@ class Slides:
             self.list = []
             self.update_from_wikipedia()
 
-            logging.debug('Updating slides from the local directory: %s', configs.working_directory)
+            logging.debug(
+                "Updating slides from the local directory: %s",
+                configs.working_directory,
+            )
             cleanup_directory(configs.local_lists_cache)
             list_files = local_lists_path(configs.working_directory)
             web_address = read_list_files(list_files)
@@ -75,7 +83,7 @@ class Slides:
             self.list += local_urls(local_slides)
 
             self.timestamp = now
-            logging.debug('Final slides list: %s', self.list)
+            logging.debug("Final slides list: %s", self.list)
 
     def play(self):
         """
@@ -96,9 +104,12 @@ class Slides:
         online_context, online_timestamp = wikipedia_source.get_lastrev()
 
         if online_timestamp - self.wikipedia_timestamp > timedelta():
-            logging.debug('New Wikipedia list was found!')
-            logging.debug('local wp timestamp: %s, New wp timestamp: %s',
-                          self.wikipedia_timestamp, online_timestamp)
+            logging.debug("New Wikipedia list was found!")
+            logging.debug(
+                "local wp timestamp: %s, New wp timestamp: %s",
+                self.wikipedia_timestamp,
+                online_timestamp,
+            )
             cleanup_directory(configs.wikipedia_list_cache)
             update_wikipedia_listfile(online_context)
             wikipedia_list = parse_txt_file(configs.wikipedia_listfile)
@@ -106,16 +117,16 @@ class Slides:
             self.list += web_links(wikipedia_list)
             self.wikipedia_timestamp = online_timestamp
         else:
-            if online_context == '':
+            if online_context == "":
                 cleanup_directory(configs.wikipedia_list_cache)
-                logging.debug('Wikipedia list was empty!')
+                logging.debug("Wikipedia list was empty!")
             else:
-                logging.debug('Wikipedia list was still valid!')
+                logging.debug("Wikipedia list was still valid!")
                 wikipedia_list = parse_txt_file(configs.wikipedia_listfile)
                 self.list += web_links(wikipedia_list)
 
 
-def local_files_path(input_dir='.'):
+def local_files_path(input_dir="."):
     """
     returns a list of the absolute paths to the slide files in the
     input directory and all of its subdirectories
@@ -123,14 +134,14 @@ def local_files_path(input_dir='.'):
     paths = []
     for root, dirs, files in os.walk(input_dir, topdown=True):
         for file in sorted(files):
-            if file.endswith(configs.img_extensions+configs.web_extensions):
+            if file.endswith(configs.img_extensions + configs.web_extensions):
                 path = os.path.abspath(os.path.join(root, file))
                 paths.append(path)
 
     return paths
 
 
-def local_lists_path(input_dir='.'):
+def local_lists_path(input_dir="."):
     """
     returns a list of the absolute paths to the txt files in the input directory
     and all of its subdirectories except the wikipedia list file
@@ -155,9 +166,8 @@ def local_urls(absolute_file_paths):
     urls = []
     for path in absolute_file_paths:
         if path.endswith(configs.img_extensions + configs.web_extensions):
-            urls.append('file://' + path)
+            urls.append("file://" + path)
     return urls
-
 
 
 def parse_txt_file(file_path):
@@ -168,8 +178,8 @@ def parse_txt_file(file_path):
     txt_file = open(file_path, "r")
     txtfile_lines = txt_file.readlines()
     for line in txtfile_lines:
-        new_url = line.replace('*', '').strip()
-        logging.info(file_path + ': includes: ' + new_url)
+        new_url = line.replace("*", "").strip()
+        logging.info(file_path + ": includes: " + new_url)
         urls.append(new_url)
     return urls
 
@@ -181,12 +191,13 @@ def cache_images(urls, path):
     for url in urls:
         if url.endswith(configs.img_extensions):
             filename = os.path.basename(url)
-            local_path = path + '/' + filename
+            local_path = path + "/" + filename
             try:
                 wget.download(url, out=local_path)
-                logging.debug('Downloaded %s to %s', url, local_path)
+                logging.debug("Downloaded %s to %s", url, local_path)
             except Exception as excp:
-                logging.error(str(excp) + ' ' + url)
+                logging.error(str(excp) + " " + url)
+
 
 def read_list_files(list_files):
     """
@@ -198,6 +209,7 @@ def read_list_files(list_files):
 
     return urls
 
+
 def web_links(urls):
     """
    removes the image URLs and returns only the web links
@@ -207,6 +219,7 @@ def web_links(urls):
             urls.remove(url)
 
     return urls
+
 
 def update_wikipedia_listfile(context):
     """
@@ -219,7 +232,7 @@ def update_wikipedia_listfile(context):
 
     if os.path.isfile(configs.wikipedia_listfile):
         if os.path.getsize(configs.wikipedia_listfile) > 0:
-            logging.debug('Wikipedia page has been successfully downloaded!')
+            logging.debug("Wikipedia page has been successfully downloaded!")
     else:
         logging.error("Couldn't write the %s to the disk!", configs.wikipedia_listfile)
 
