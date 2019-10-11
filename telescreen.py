@@ -18,7 +18,7 @@ This file is part of Telescreen: A slideshow script for the WikiMUC
 import argparse
 import os
 from selenium import webdriver
-import slides
+from slides import Slides
 import configs
 
 CLI_PARSER = argparse.ArgumentParser()
@@ -38,7 +38,7 @@ configs.slides_refresh_time = ARGS.slides_refresh_time
 configs.working_directory = ARGS.working_directory
 
 
-SLIDESHOW = slides.Slides()
+SLIDESHOW = Slides()
 SLIDESHOW.browser = webdriver.Firefox()
 SLIDESHOW.browser.fullscreen_window()
 

@@ -29,13 +29,15 @@ whitelist_users = ["Meisam"]
 
 working_directory = "./"
 
+#the images included in the wikipedia page will be cached here
 #the files in this directory will be completely wiped each time the wikipedia page is updated
 wikipedia_list_cache = ""
 
 #content of the wikipedia page will be kept here
 wikipedia_listfile = ""
 
-#the files in this directory will be completely wiped each time the slides list is
+#the images included in the local list files will be cached here
+#directory will be completely wiped each time the slides list is updated
 local_lists_cache = ""
 
 #will try to download these types if found in a URL
