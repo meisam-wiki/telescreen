@@ -47,16 +47,16 @@ class Slides:
         configs.local_lists_cache = configs.cache_folder / "local"
 
         # cleanup the cache directories and the temp files
-        if not os.path.isdir(configs.cache_folder):
-            os.mkdir(configs.cache_folder)
-        if os.path.isdir(configs.wikipedia_list_cache):
+        if not os.path.isdir(str(configs.cache_folder)):
+            os.mkdir(str(configs.cache_folder))
+        if os.path.isdir(str(configs.wikipedia_list_cache)):
             cleanup_directory(configs.wikipedia_list_cache)
         else:
-            os.mkdir(configs.wikipedia_list_cache)
-        if os.path.isdir(configs.local_lists_cache):
+            os.mkdir(str(configs.wikipedia_list_cache))
+        if os.path.isdir(str(configs.local_lists_cache)):
             cleanup_directory(configs.local_lists_cache)
         else:
-            os.mkdir(configs.local_lists_cache)
+            os.mkdir(str(configs.local_lists_cache))
 
     def update_slides(self):
         """
@@ -198,7 +198,7 @@ def cache_images(urls, path):
     for url in urls:
         if url.endswith(configs.img_extensions):
             filename = os.path.basename(url)
-            local_path = os.path.join(path, filename)
+            local_path = os.path.join(str(path), filename)
             try:
                 wget.download(url, out=local_path)
                 logging.debug("Downloaded %s to %s", url, local_path)
@@ -226,5 +226,5 @@ def cleanup_directory(path):
     """
     removes all the files in the directory
     """
-    for file in os.listdir(path):
-        os.remove(os.path.join(path, file))
+    for file in os.listdir(str(path)):
+        os.remove(os.path.join(str(path), file))
