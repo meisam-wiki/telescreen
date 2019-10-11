@@ -81,8 +81,7 @@ class Slides:
             cleanup_directory(configs.local_lists_cache)
             list_files = local_lists_path(configs.working_directory)
             web_address = read_list_files(list_files)
-            cache_images(web_address, configs.local_lists_cache)
-            self.list += web_links(web_address)
+            self.list += cache_images(web_address, configs.local_lists_cache)
 
             local_slides = local_files_path(configs.working_directory)
             self.list += local_urls(local_slides)
@@ -118,8 +117,7 @@ class Slides:
             cleanup_directory(configs.wikipedia_list_cache)
             update_wikipedia_listfile(online_context)
             wikipedia_list = parse_txt_file(configs.wikipedia_listfile)
-            cache_images(wikipedia_list, configs.wikipedia_list_cache)
-            self.list += web_links(wikipedia_list)
+            self.list += cache_images(wikipedia_list, configs.wikipedia_list_cache)
             self.wikipedia_timestamp = online_timestamp
         else:
             if online_context == "":
@@ -134,10 +132,12 @@ class Slides:
 def local_files_path(input_dir="."):
     """
     returns a list of the absolute paths to the slide files in the
-    input directory and all of its subdirectories
+    input directory and all of its subdirectories, excluding cache folders
     """
     paths = []
     for root, dirs, files in os.walk(input_dir, topdown=True):
+        if Path(root) == configs.cache_folder:
+            continue
         for file in sorted(files):
             if file.endswith(configs.img_extensions + configs.web_extensions):
                 path = os.path.abspath(os.path.join(root, file))
@@ -193,6 +193,7 @@ def cache_images(urls, path):
     """
     Downloads the images in the URLs to the 'path' directory
     """
+    new_urls = []
     for url in urls:
         if url.endswith(configs.img_extensions):
             filename = os.path.basename(url)
@@ -202,6 +203,11 @@ def cache_images(urls, path):
                 logging.debug("Downloaded %s to %s", url, local_path)
             except Exception as excp:
                 logging.error(str(excp) + " " + url)
+            else:
+                new_urls.append(local_path)
+        else:
+            new_urls.append(url)
+    return new_urls
 
 
 def read_list_files(list_files):
@@ -217,7 +223,7 @@ def read_list_files(list_files):
 
 def web_links(urls):
     """
-   removes the image URLs and returns only the web links
+    removes the image URLs and returns only the web links
     """
     for url in urls:
         if url.endswith(configs.img_extensions):
