@@ -37,6 +37,7 @@ class Slides:
 
     def __init__(self):
         self.list = []
+        self.wikipedia_list = []
         self.timestamp = 0.0
         self.wikipedia_timestamp = datetime.min
 
@@ -44,9 +45,6 @@ class Slides:
         configs.cache_folder = working_directory / "cache"
         configs.wikipedia_list_cache = configs.cache_folder / "wp"
         configs.local_lists_cache = configs.cache_folder / "local"
-        configs.wikipedia_listfile = (
-            configs.wikipedia_list_cache / "wikipedia_listfile.txt"
-        )
 
         # cleanup the cache directories and the temp files
         if not os.path.isdir(configs.cache_folder):
@@ -59,8 +57,6 @@ class Slides:
             cleanup_directory(configs.local_lists_cache)
         else:
             os.mkdir(configs.local_lists_cache)
-        if os.path.isfile(configs.wikipedia_listfile):
-            os.remove(os.path.abspath(configs.wikipedia_listfile))
 
     def update_slides(self):
         """
@@ -115,9 +111,11 @@ class Slides:
                 online_timestamp,
             )
             cleanup_directory(configs.wikipedia_list_cache)
-            update_wikipedia_listfile(online_context)
-            wikipedia_list = parse_txt_file(configs.wikipedia_listfile)
-            self.list += cache_images(wikipedia_list, configs.wikipedia_list_cache)
+            self.wikipedia_list = parse_list(online_context.split(sep="\n"))
+            self.wikipedia_list = cache_images(
+                self.wikipedia_list, configs.wikipedia_list_cache
+            )
+            self.list += self.wikipedia_list
             self.wikipedia_timestamp = online_timestamp
         else:
             if online_context == "":
@@ -125,8 +123,7 @@ class Slides:
                 logging.debug("Wikipedia list was empty!")
             else:
                 logging.debug("Wikipedia list was still valid!")
-                wikipedia_list = parse_txt_file(configs.wikipedia_listfile)
-                self.list += web_links(wikipedia_list)
+                self.list += self.wikipedia_list
 
 
 def local_files_path(input_dir="."):
@@ -157,9 +154,6 @@ def local_lists_path(input_dir="."):
             if file.endswith(configs.list_extensions):
                 path = os.path.abspath(os.path.join(root, file))
                 paths.append(path)
-
-    if os.path.abspath(configs.wikipedia_listfile) in paths:
-        paths.remove(os.path.abspath(configs.wikipedia_listfile))
     return paths
 
 
@@ -175,18 +169,25 @@ def local_urls(absolute_file_paths):
     return urls
 
 
+def parse_list(lines, name=""):
+    """
+    reads a list of strings and extracts the URLs
+    """
+    urls = []
+    for line in lines:
+        new_url = line.replace("*", "").strip()
+        logging.info("%s: includes: %s", name, new_url)
+        urls.append(new_url)
+    return urls
+
+
 def parse_txt_file(file_path):
     """
     reads a local .txt file and returns the urls in the file
     """
-    urls = []
     with open(file_path, "r") as txt_file:
         txtfile_lines = txt_file.readlines()
-    for line in txtfile_lines:
-        new_url = line.replace("*", "").strip()
-        logging.info("%s: includes: %s", file_path, new_url)
-        urls.append(new_url)
-    return urls
+    return parse_list(txtfile_lines, file_path)
 
 
 def cache_images(urls, path):
@@ -219,32 +220,6 @@ def read_list_files(list_files):
         urls += parse_txt_file(file)
 
     return urls
-
-
-def web_links(urls):
-    """
-    removes the image URLs and returns only the web links
-    """
-    for url in urls:
-        if url.endswith(configs.img_extensions):
-            urls.remove(url)
-
-    return urls
-
-
-def update_wikipedia_listfile(context):
-    """
-    gets the content of the wikipedia page and puts it inside a text file
-    """
-
-    with open(configs.wikipedia_listfile, "w") as file:
-        file.write(context)
-
-    if os.path.isfile(configs.wikipedia_listfile):
-        if os.path.getsize(configs.wikipedia_listfile) > 0:
-            logging.debug("Wikipedia page has been successfully downloaded!")
-    else:
-        logging.error("Couldn't write the %s to the disk!", configs.wikipedia_listfile)
 
 
 def cleanup_directory(path):
