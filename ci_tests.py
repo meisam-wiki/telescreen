@@ -15,7 +15,7 @@ This file is part of Telescreen: A slideshow script for the WikiMUC
     You should have received a copy of the GNU General Public License
     along with Telescreen. If not, see <https://www.gnu.org/licenses/>.
 """
-import os
+
 import configs
 
 def test_list(generated_slides_list):
@@ -26,11 +26,11 @@ def test_list(generated_slides_list):
     test_slides_list = ["https://www.wikidata.org/?uselang=de", #from wikipedia
                         "https://commons.wikimedia.org/?uselang=de", #from wikipedia
                         "https://de.wikipedia.org", #from wikipedia
-                        "file://" + os.path.abspath(str(configs.wikipedia_list_cache) + "/2000px-Strategy_Graphic_-_High_level.svg.png"), #from wikipedia
+                        (configs.wikipedia_list_cache / "2000px-Strategy_Graphic_-_High_level.svg.png").resolve().as_uri(), #from wikipedia
                         "https://darksky.net/forecast/48.1521,11.5445/ca24/de", # form ./test/test_list.txt
                         "https://www.wikipedia.org", # form ./test/test_list.txt
-                        "file://" + os.path.abspath(str(configs.local_lists_cache) + "/WikiMUC_Garamond2.jpg"), # form ./test/test_list.txt
-                        "file://" + os.path.abspath(str(configs.working_directory) + "/Angertorstr._3_mit_WikiMUC_bearbeitet.jpg") # form ./test/*
+                        (configs.local_lists_cache / "WikiMUC_Garamond2.jpg").resolve().as_uri(), # form ./test/test_list.txt
+                        (configs.working_directory / "Angertorstr._3_mit_WikiMUC_bearbeitet.jpg").resolve().as_uri(), # form ./test/*
                         ]
 
     generated_slides_list.sort()
@@ -41,7 +41,7 @@ def test_list(generated_slides_list):
         return 0
     else:
         print("\nERROR: The generated slides list is not the same as the reference list!")
-        print("reference slides list: ", test_slides_list)
-        print("generated slides list: ", generated_slides_list)
+        print("Test reference slides list: ", test_slides_list)
+        print("Generated slides list: ", generated_slides_list)
         return 1
     

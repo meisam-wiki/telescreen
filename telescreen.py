@@ -17,7 +17,7 @@ This file is part of Telescreen: A slideshow script for the WikiMUC
 """
 import argparse
 import logging
-import os
+from pathlib import Path
 import sys
 
 from selenium import webdriver
@@ -32,7 +32,7 @@ CLI_PARSER.add_argument(
     help="directory of images",
     nargs="?",
     dest="working_directory",
-    default=os.getcwd(),
+    default=Path.cwd(),
 )
 CLI_PARSER.add_argument(
     "-w",
@@ -44,13 +44,13 @@ CLI_PARSER.add_argument(
 )
 CLI_PARSER.add_argument(
     "--headless_test",
-	action="store_true",
-    help="Just check the generated list of the slides"
+    action="store_true",
+    help="Run the functionality tests"
 )
 ARGS = CLI_PARSER.parse_args()
 
 configs.slides_refresh_time = ARGS.slides_refresh_time
-configs.working_directory = ARGS.working_directory
+configs.working_directory = Path(ARGS.working_directory)
 
 
 SLIDESHOW = Slides()

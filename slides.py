@@ -17,7 +17,6 @@ This file is part of Telescreen: A slideshow script for the WikiMUC
 """
 
 import logging
-import os
 import time
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -41,22 +40,21 @@ class Slides:
         self.timestamp = 0.0
         self.wikipedia_timestamp = datetime.min
 
-        working_directory = Path(configs.working_directory)
-        configs.cache_folder = working_directory / "cache"
+        configs.cache_folder = configs.working_directory / "cache"
         configs.wikipedia_list_cache = configs.cache_folder / "wp"
         configs.local_lists_cache = configs.cache_folder / "local"
 
         # cleanup the cache directories and the temp files
-        if not os.path.isdir(str(configs.cache_folder)):
-            os.mkdir(str(configs.cache_folder))
-        if os.path.isdir(str(configs.wikipedia_list_cache)):
+        if not configs.cache_folder.is_dir():
+            configs.cache_folder.mkdir()
+        if configs.wikipedia_list_cache.is_dir():
             cleanup_directory(configs.wikipedia_list_cache)
         else:
-            os.mkdir(str(configs.wikipedia_list_cache))
-        if os.path.isdir(str(configs.local_lists_cache)):
+            configs.wikipedia_list_cache.mkdir()
+        if configs.local_lists_cache.is_dir():
             cleanup_directory(configs.local_lists_cache)
         else:
-            os.mkdir(str(configs.local_lists_cache))
+            configs.local_lists_cache.mkdir()
 
     def update_slides(self):
         """
@@ -80,7 +78,7 @@ class Slides:
             self.list += cache_images(web_address, configs.local_lists_cache)
 
             local_slides = local_files_path(configs.working_directory)
-            self.list += local_urls(local_slides)
+            self.list += [Path(slide).resolve().as_uri() for slide in local_slides]
 
             self.timestamp = now
             logging.debug("Final slides list: %s", self.list)
@@ -135,16 +133,13 @@ def local_files_path(input_dir="."):
     returns a list of the absolute paths to the slide files in the
     input directory and all of its subdirectories, excluding the cache folder
     """
-    paths = []
-    for root, dirs, files in os.walk(input_dir, topdown=True):
-        if Path(root).match(str(configs.cache_folder)+'/*'):
-            continue
-        for file in sorted(files):
-            if file.endswith(configs.img_extensions + configs.web_extensions):
-                path = os.path.abspath(os.path.join(root, file))
-                paths.append(path)
+    abs_paths = []
+    for extension in configs.img_extensions + configs.web_extensions:
+        for path in input_dir.glob('**/*.' + extension):
+            if not configs.cache_folder in path.parents:
+                abs_paths.append(path.resolve())
 
-    return paths
+    return abs_paths
 
 
 def local_lists_path(input_dir="."):
@@ -152,28 +147,15 @@ def local_lists_path(input_dir="."):
     returns a list of the absolute paths to the txt files in the input directory
     and all of its subdirectories
     """
-    paths = []
-    for root, dirs, files in os.walk(input_dir, topdown=True):
-        for file in sorted(files):
-            if file.endswith(configs.list_extensions):
-                path = os.path.abspath(os.path.join(root, file))
-                paths.append(path)
-    return paths
+    abs_paths = []
+    for extension in configs.list_extensions:
+        for path in input_dir.glob('**/*.' + extension):
+            abs_paths.append(path.resolve())
+
+    return abs_paths
 
 
-def local_urls(absolute_file_paths):
-    """
-    generates a list of the urls from the list of the absolute paths
-    to the local files
-    """
-    urls = []
-    for path in absolute_file_paths:
-        if path.endswith(configs.img_extensions + configs.web_extensions):
-            urls.append("file://" + os.path.abspath(path))
-    return urls
-
-
-def parse_list(text, name=""):
+def parse_list(text, name):
     """
     reads a string and extracts the URLs
     """
@@ -189,7 +171,7 @@ def parse_txt_file(file_path):
     """
     reads a local .txt file and returns the urls in the file
     """
-    with open(file_path, "r") as txt_file:
+    with file_path.open() as txt_file:
         content = txt_file.read()
     return parse_list(content, file_path)
 
@@ -202,15 +184,15 @@ def cache_images(urls, path):
     new_urls = []
     for url in urls:
         if url.endswith(configs.img_extensions):
-            filename = os.path.basename(url)
-            local_path = os.path.join(str(path), filename)
+            filename = Path(url).name
+            local_path = path / filename
             try:
-                wget.download(url, out=local_path)
+                wget.download(url, out=str(local_path))
                 logging.debug("Downloaded %s to %s", url, local_path)
             except Exception as excp:
                 logging.error(str(excp) + " " + url)
             else:
-                new_urls += local_urls((local_path,))
+                new_urls.append(local_path.resolve().as_uri())
         else:
             new_urls.append(url)
     return new_urls
@@ -231,5 +213,5 @@ def cleanup_directory(path):
     """
     removes all the files in the directory
     """
-    for file in os.listdir(str(path)):
-        os.remove(os.path.join(str(path), file))
+    for file in path.iterdir():
+        file.unlink()
