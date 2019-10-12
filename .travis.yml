@@ -11,15 +11,19 @@ matrix:
       python: 3.7      
     - name: "Python 3.7.4 on macOS"
       os: osx
-      osx_image: xcode11    # Python 3.7.4 running on macOS 10.14.4
-      language: shell       # 'language: python' is an error on Travis CI macOS
+      osx_image: xcode11
+      language: shell
     - name: "Python 3.7.4 on Windows"
-      os: windows           # Windows 10.0.17134 N/A Build 17134
-      language: shell       # 'language: python' is an error on Travis CI Windows
+      os: windows
+      language: shell
       before_install:
         - choco install python
         - python -m pip install --upgrade pip
       env: PATH=/c/Python37:/c/Python37/Scripts:$PATH
+      script:
+        - python -V
+        - python -m py_compile ci_tests.py configs.py slides.py telescreen.py wikipedia_source.py
+        - python telescreen.py -dir ./test/ --headless_test
 
 install:
   - pip3 install selenium wget requests
