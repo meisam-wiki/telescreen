@@ -16,6 +16,7 @@ This file is part of Telescreen: A slideshow script for the WikiMUC
     along with Telescreen. If not, see <https://www.gnu.org/licenses/>.
 """
 import argparse
+import logging
 import os
 import sys
 
@@ -55,6 +56,9 @@ configs.working_directory = ARGS.working_directory
 SLIDESHOW = Slides()
 
 if ARGS.headless_test:
+    console = logging.StreamHandler()
+    console.setLevel(logging.DEBUG)
+    logging.getLogger('').addHandler(console)
     return_code = 0
     SLIDESHOW.update_slides()
     return_code += ci_tests.test_list(SLIDESHOW.list)
