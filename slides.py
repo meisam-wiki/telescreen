@@ -44,7 +44,7 @@ class Slides:
         configs.wikipedia_list_cache = configs.cache_folder / "wp"
         configs.local_lists_cache = configs.cache_folder / "local"
 
-        # cleanup the cache directories and the temp files
+        # cleanup/create the cache directories
         if not configs.cache_folder.is_dir():
             configs.cache_folder.mkdir()
         if configs.wikipedia_list_cache.is_dir():
@@ -179,7 +179,7 @@ def parse_txt_file(file_path):
 def cache_images(urls, path):
     """
     Downloads the images in the URLs to the 'path' directory
-    replaces the image URLs in the list with link to the local files
+    replaces the image URLs in the list with link to the local downloaded files
     """
     new_urls = []
     for url in urls:

@@ -33,20 +33,23 @@ You can edit the configs.py and change the default parameters of Telescreen. Thi
 - Slides refresh time
 
 ### Adding slides
-You can add slides by either putting images/webpages in the working directory, creating a .txt file with each URL in a newline, or adding the URLs to a Wikipedia page by the whitelisted user accounts. (URLS are allowed to start with “*”) 
-The contents of the Wikipedia page will be automatically put into the “wikipedia_listfile.txt” file in the working directory and parsed from there.
+You can add slides by either putting images/webpages in the working directory, creating a .txt file with each URL in a newline, or adding the URLs to a Wikipedia page by the whitelisted user accounts. (the URLs are allowed to start with “*”)
 
 ### Execution
+* Run the Telescreen with the default value for the parameters as defined in the configs.py
 ```sh
 $ python3 telescreen.py
 ```
-Runs the Telescreen with the default value for the parameters as defined in the configs.py
 
+* Show the available command line switches
+```sh
+$ python3 telescreen.py --help
+```
+
+* Run the Telescreen with slide files in ./test/ directory and show each slide for 20 seconds
 ```sh
 $ python3 telescreen.py -dir ./test/ -w 20
 ```
-  - -dir: Path to the local directory containing the slides
-  - -w: Slides refresh time. Delay time (in seconds) between changing the slides
 
 ### Troubleshooting
 By default, the Telescreen logs all the messages to “telescreen.log” file. You can use this file for monitoring the events or for its troubleshooting. The logging behavior of the Telescreen can be tweaked in the configs.py file.
