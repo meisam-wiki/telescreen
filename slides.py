@@ -73,11 +73,17 @@ class Slides:
                 configs.working_directory,
             )
             cleanup_directory(configs.local_lists_cache)
-            list_files = local_lists_path(configs.working_directory)
+            list_files = local_absolute_paths(
+                configs.working_directory,
+                configs.list_extensions
+            )
             web_address = read_list_files(list_files)
             self.list += cache_images(web_address, configs.local_lists_cache)
 
-            local_slides = local_files_path(configs.working_directory)
+            local_slides = local_absolute_paths(
+                configs.working_directory,
+                configs.img_extensions + configs.web_extensions
+            )
             self.list += [Path(slide).resolve().as_uri() for slide in local_slides]
 
             self.timestamp = now
@@ -127,30 +133,16 @@ class Slides:
                 logging.debug("Wikipedia list was still valid!")
                 self.list += self.wikipedia_list
 
-
-def local_files_path(input_dir="."):
+def local_absolute_paths(directory, extensions_list):
     """
-    returns a list of the absolute paths to the slide files in the
-    input directory and all of its subdirectories, excluding the cache folder
+    returns a list of the absolute paths to the files with the given extension in
+    the given directory and all of its subdirectories, excluding the cache folder
     """
     abs_paths = []
-    for extension in configs.img_extensions + configs.web_extensions:
-        for path in input_dir.glob('**/*.' + extension):
+    for extension in extensions_list:
+        for path in directory.glob('**/*.' + extension):
             if not configs.cache_folder in path.parents:
                 abs_paths.append(path.resolve())
-
-    return abs_paths
-
-
-def local_lists_path(input_dir="."):
-    """
-    returns a list of the absolute paths to the txt files in the input directory
-    and all of its subdirectories
-    """
-    abs_paths = []
-    for extension in configs.list_extensions:
-        for path in input_dir.glob('**/*.' + extension):
-            abs_paths.append(path.resolve())
 
     return abs_paths
 
