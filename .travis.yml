@@ -8,7 +8,7 @@ matrix:
     - name: "Python 3.6 on Xenial Linux"
       python: 3.6
     - name: "Python 3.7 on Xenial Linux"
-      python: 3.7      
+      python: 3.7
     - name: "Python 3.7.4 on macOS"
       os: osx
       osx_image: xcode11

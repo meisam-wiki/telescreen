@@ -62,6 +62,7 @@ if ARGS.headless_test:
     return_code = 0
     SLIDESHOW.update_slides()
     return_code += ci_tests.test_list(SLIDESHOW.list)
+    return_code += ci_tests.test_cache_renewal(SLIDESHOW)
     sys.exit(return_code)
 
 SLIDESHOW.browser = webdriver.Firefox()
