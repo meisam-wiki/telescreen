@@ -37,7 +37,7 @@ class Slides:
     def __init__(self):
         self.list = []
         self.wikipedia_list = []
-        self.timestamp = 0.0
+        self.timestamp = datetime.min
         self.wikipedia_timestamp = datetime.min
 
         configs.cache_folder = configs.working_directory / "cache"
@@ -63,7 +63,7 @@ class Slides:
             2-reading local list files, caching the images, adding URLs to list
             3-reading the local files and adding them to the list
         """
-        now = time.time()
+        now = datetime.now()
         if (now - self.timestamp) > configs.cache_lifetime:
             self.list = []
             self.update_from_wikipedia()

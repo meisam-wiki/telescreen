@@ -16,6 +16,7 @@ This file is part of Telescreen: A slideshow script for the WikiMUC
     along with Telescreen. If not, see <https://www.gnu.org/licenses/>.
 """
 import logging
+from datetime import timedelta
 
 logging.basicConfig(filename="telescreen.log", level=logging.DEBUG)
 
@@ -48,8 +49,9 @@ web_extensions = ("htm", "html")
 list_extensions = ("txt",)
 
 # -----------Slide configs-----------
-# Update the slides list every *** seconds
-cache_lifetime = 1 * 3600
+# Update the slides list every ***
+cache_lifetime = timedelta(hours=1)
+
 
 # show each slide for *** seconds
 slides_refresh_time = 30
