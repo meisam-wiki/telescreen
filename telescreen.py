@@ -60,9 +60,9 @@ if ARGS.headless_test:
     console.setLevel(logging.DEBUG)
     logging.getLogger('').addHandler(console)
     return_code = 0
-    SLIDESHOW.update_slides()
-    return_code += ci_tests.test_list(SLIDESHOW.list)
-    return_code += ci_tests.test_cache_renewal(SLIDESHOW)
+    return_code += ci_tests.test_list()
+    return_code += ci_tests.test_cache_renewal()
+    return_code += ci_tests.test_errors()
     sys.exit(return_code)
 
 SLIDESHOW.browser = webdriver.Firefox()

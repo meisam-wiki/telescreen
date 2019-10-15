@@ -45,6 +45,8 @@ class Slides:
         configs.local_lists_cache = configs.cache_folder / "local"
 
         # cleanup/create the cache directories
+        if not configs.working_directory.is_dir():
+            configs.working_directory.mkdir()
         if not configs.cache_folder.is_dir():
             configs.cache_folder.mkdir()
         if configs.wikipedia_list_cache.is_dir():
