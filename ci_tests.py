@@ -105,7 +105,7 @@ def test_errors():
     print("Checking Telescreen error handling.")
 
     print("Testing invalid working directory.")
-    configs.working_directory = Path('./invalid_path_420')
+    configs.working_directory = Path('./invalid_path_420/deeper_level')
     try:
         slideshow = Slides()
     except Exception as exc:
@@ -115,7 +115,8 @@ def test_errors():
     configs.wikipedia_list_cache.rmdir()
     configs.local_lists_cache.rmdir()
     configs.cache_folder.rmdir()
-    configs.working_directory.rmdir()
+    configs.working_directory.rmdir() #./invalid_path_420/deeper_level
+    configs.working_directory.parent.rmdir() #./invalid_path_420
     configs.working_directory = Path('./test')
 
 

@@ -45,18 +45,10 @@ class Slides:
         configs.local_lists_cache = configs.cache_folder / "local"
 
         # cleanup/create the cache directories
-        if not configs.working_directory.is_dir():
-            configs.working_directory.mkdir()
-        if not configs.cache_folder.is_dir():
-            configs.cache_folder.mkdir()
-        if configs.wikipedia_list_cache.is_dir():
-            cleanup_directory(configs.wikipedia_list_cache)
-        else:
-            configs.wikipedia_list_cache.mkdir()
-        if configs.local_lists_cache.is_dir():
-            cleanup_directory(configs.local_lists_cache)
-        else:
-            configs.local_lists_cache.mkdir()
+        configs.cache_folder.mkdir(parents=True, exist_ok=True)
+        cleanup_directory(configs.cache_folder)
+        configs.wikipedia_list_cache.mkdir()
+        configs.local_lists_cache.mkdir()
 
     def update_slides(self):
         """
@@ -100,7 +92,8 @@ class Slides:
                 self.browser.get(url)
             except Exception as exc:
                 logging.warning("Couldn't load the url: %s", str(exc))
-            time.sleep(configs.slides_refresh_time)
+            else:
+                time.sleep(configs.slides_refresh_time)
 
     def update_from_wikipedia(self):
         """
@@ -112,7 +105,7 @@ class Slides:
         if online_timestamp - self.wikipedia_timestamp > timedelta():
             logging.debug("New Wikipedia list was found!")
             logging.debug(
-                "local wp timestamp: %s, New wp timestamp: %s",
+                "wp cache timestamp: %s, live wp timestamp: %s",
                 self.wikipedia_timestamp,
                 online_timestamp,
             )
@@ -182,10 +175,10 @@ def cache_images(urls, path):
             local_path = path / filename
             try:
                 wget.download(url, out=str(local_path))
-                logging.debug("Downloaded %s to %s", url, local_path)
             except Exception as excp:
                 logging.error(str(excp) + " " + url)
             else:
+                logging.debug("Downloaded %s to %s", url, local_path)
                 new_urls.append(local_path.resolve().as_uri())
         else:
             new_urls.append(url)
@@ -205,7 +198,11 @@ def read_list_files(list_files):
 
 def cleanup_directory(path):
     """
-    removes all the files in the directory
+    removes all the files and the subdirectories in a given path
     """
-    for file in path.iterdir():
-        file.unlink()
+    for child in path.iterdir():
+        if child.is_dir():
+            cleanup_directory(child)
+            child.rmdir()
+        else:
+            child.unlink()

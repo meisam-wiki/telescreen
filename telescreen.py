@@ -53,8 +53,6 @@ configs.slides_refresh_time = ARGS.slides_refresh_time
 configs.working_directory = Path(ARGS.working_directory)
 
 
-SLIDESHOW = Slides()
-
 if ARGS.headless_test:
     console = logging.StreamHandler()
     console.setLevel(logging.DEBUG)
@@ -65,6 +63,7 @@ if ARGS.headless_test:
     return_code += ci_tests.test_errors()
     sys.exit(return_code)
 
+SLIDESHOW = Slides()
 SLIDESHOW.browser = webdriver.Firefox()
 SLIDESHOW.browser.fullscreen_window()
 

@@ -61,7 +61,7 @@ def get_lastrev():
                 timestamp = datetime.strptime(rev["timestamp"], "%Y-%m-%dT%H:%M:%SZ")
                 return rev["*"], timestamp
             else:
-                logging.debug("User %s is NOT whitelisted!", rev["user"])
+                logging.debug("User:%s is NOT whitelisted!", rev["user"])
 
         logging.warning(
             'Couldn\'t find any revisions from the Wikipedia page "%s" '
