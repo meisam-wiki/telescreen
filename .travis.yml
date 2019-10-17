@@ -35,9 +35,8 @@ jobs:
         - python -m pip install --upgrade pip
         - powershell -Command New-Item -ItemType HardLink -Path "c:/Python38/python3.exe" -Target "c:/Python38/python.exe"
       env: PATH=/c/Python38:/c/Python38/Scripts:$PATH
-
 install:
-  - pip3 install selenium wget requests
+  - pip3 install -r requirements.txt
 script:
   - python3 -V
   - python3 -m py_compile ci_tests.py configs.py slides.py telescreen.py wikipedia_source.py
