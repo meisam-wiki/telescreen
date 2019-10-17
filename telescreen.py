@@ -17,13 +17,13 @@ This file is part of Telescreen: A slideshow script for the WikiMUC
 """
 import argparse
 import logging
-from pathlib import Path
 import sys
+from pathlib import Path
 
 from selenium import webdriver
 
-import configs
 import ci_tests
+import configs
 from slides import Slides
 
 CLI_PARSER = argparse.ArgumentParser()
@@ -43,9 +43,7 @@ CLI_PARSER.add_argument(
     default=30,
 )
 CLI_PARSER.add_argument(
-    "--headless_test",
-    action="store_true",
-    help="Run the functionality tests"
+    "--headless_test", action="store_true", help="Run the functionality tests"
 )
 ARGS = CLI_PARSER.parse_args()
 
@@ -56,7 +54,7 @@ configs.working_directory = Path(ARGS.working_directory)
 if ARGS.headless_test:
     console = logging.StreamHandler()
     console.setLevel(logging.DEBUG)
-    logging.getLogger('').addHandler(console)
+    logging.getLogger("").addHandler(console)
     return_code = 0
     return_code += ci_tests.test_list()
     return_code += ci_tests.test_cache_renewal()

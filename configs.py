@@ -17,6 +17,7 @@ This file is part of Telescreen: A slideshow script for the WikiMUC
 """
 import logging
 from datetime import timedelta
+from pathlib import Path
 
 logging.basicConfig(filename="telescreen.log", level=logging.DEBUG)
 
@@ -28,18 +29,18 @@ wikipedia_lang = "de"
 # list of the users who are allowed to edit the wikipedia page
 whitelist_users = ["Meisam"]
 
-working_directory = "./"
+working_directory = Path(".")
 
 # images will be cached here
-cache_folder = ""
+cache_folder = Path(".")
 
 # the images included in the wikipedia page will be cached here
 # the files in this directory will be completely wiped each time the wikipedia page is updated
-wikipedia_list_cache = ""
+wikipedia_list_cache = Path(".")
 
 # the images included in the local list files will be cached here
 # directory will be completely wiped each time the slides list is updated
-local_lists_cache = ""
+local_lists_cache = Path(".")
 
 # will try to download these types if found in a URL
 img_extensions = ("jpeg", "jpg", "png", "gif")

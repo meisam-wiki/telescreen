@@ -1,13 +1,19 @@
 language: python
-matrix:
+jobs:
   include:
+    - name: "Formatting checks on Python 3.7 (Xenial Linux)"
+      python: 3.7
+      install:
+        - pip3 install black
+      script:
+        - black --target-version py35 --check ./
     - name: "Python 3.5 on Xenial Linux"
       python: 3.5
     - name: "Python 3.6 on Xenial Linux"
       python: 3.6
     - name: "Python 3.7 on Xenial Linux"
       python: 3.7
-    - name: "Python 3.7.4 on macOS"
+    - name: "Python 3.7 on macOS"
       os: osx
       osx_image: xcode11
       language: shell

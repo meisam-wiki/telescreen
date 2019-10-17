@@ -68,15 +68,14 @@ class Slides:
             )
             cleanup_directory(configs.local_lists_cache)
             list_files = local_absolute_paths(
-                configs.working_directory,
-                configs.list_extensions
+                configs.working_directory, configs.list_extensions
             )
             web_address = read_list_files(list_files)
-            self.list += cache_images(web_address, configs.local_lists_cache)
+            self.list += cache_images_inplace(web_address, configs.local_lists_cache)
 
             local_slides = local_absolute_paths(
                 configs.working_directory,
-                configs.img_extensions + configs.web_extensions
+                configs.img_extensions + configs.web_extensions,
             )
             self.list += [Path(slide).resolve().as_uri() for slide in local_slides]
 
@@ -110,10 +109,11 @@ class Slides:
                 online_timestamp,
             )
             cleanup_directory(configs.wikipedia_list_cache)
-            self.wikipedia_list = parse_list(online_content,
-                                             configs.wikipedia_lang + ":" +
-                                             configs.wikipedia_list_page)
-            self.wikipedia_list = cache_images(
+            self.wikipedia_list = parse_list(
+                online_content,
+                configs.wikipedia_lang + ":" + configs.wikipedia_list_page,
+            )
+            self.wikipedia_list = cache_images_inplace(
                 self.wikipedia_list, configs.wikipedia_list_cache
             )
             self.list += self.wikipedia_list
@@ -128,6 +128,7 @@ class Slides:
                 logging.debug("Wikipedia list was still valid!")
                 self.list += self.wikipedia_list
 
+
 def local_absolute_paths(directory, extensions_list):
     """
     returns a list of the absolute paths to the files with the given extension in
@@ -135,7 +136,7 @@ def local_absolute_paths(directory, extensions_list):
     """
     abs_paths = []
     for extension in extensions_list:
-        for path in directory.glob('**/*.' + extension):
+        for path in directory.glob("**/*." + extension):
             if not configs.cache_folder in path.parents:
                 abs_paths.append(path.resolve())
 
@@ -163,7 +164,7 @@ def parse_txt_file(file_path):
     return parse_list(content, file_path)
 
 
-def cache_images(urls, path):
+def cache_images_inplace(urls, path):
     """
     Downloads the images in the URLs to the 'path' directory
     replaces the image URLs in the list with link to the local downloaded files
