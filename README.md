@@ -1,4 +1,6 @@
 [![Build Status](https://travis-ci.com/meisam-wiki/telescreen.svg?branch=master)](https://travis-ci.com/meisam-wiki/telescreen)
+![Python version](https://img.shields.io/badge/python-%3E%3D3.5-blue)
+[![License: GPL v3+](https://img.shields.io/badge/License-GPLv3+-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 ## Telescreen
 A simple image & web-page slideshow for the [WikiMUC](https://de.wikipedia.org/wiki/Wikipedia:WikiMUC)
 
