@@ -4,9 +4,11 @@ jobs:
     - name: "Formatting checks on Python 3.7 (Xenial Linux)"
       python: 3.7
       install:
-        - pip3 install black
+        - pip3 install -r requirements.txt
+        - pip3 install black isort
       script:
-        - black --target-version py35 --check ./
+        - isort -c -vb ./*.py
+        - black --target-version py35 --check ./*.py
     - name: "Python 3.5 on Xenial Linux"
       python: 3.5
     - name: "Python 3.6 on Xenial Linux"
