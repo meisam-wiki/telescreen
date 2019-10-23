@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.com/meisam-wiki/telescreen.svg?branch=master)](https://travis-ci.com/meisam-wiki/telescreen)
+[![Coverage Status](https://coveralls.io/repos/github/meisam-wiki/telescreen/badge.svg?branch=master)](https://coveralls.io/github/meisam-wiki/telescreen?branch=master)
 ![Python Version](https://img.shields.io/badge/python-%3E%3D3.5-blue)
 [![Code Style](https://img.shields.io/badge/code%20style-black-black)](https://github.com/psf/black)
 [![License: GPL v3+](https://img.shields.io/badge/License-GPLv3+-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)

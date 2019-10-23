@@ -9,6 +9,7 @@ jobs:
       script:
         - isort -c -vb ./*.py
         - black --target-version py35 --check ./*.py
+      after_success: true
     - name: "Python 3.5 on Xenial Linux"
       python: 3.5
     - name: "Python 3.6 on Xenial Linux"
@@ -39,7 +40,11 @@ jobs:
       env: PATH=/c/Python38:/c/Python38/Scripts:$PATH
 install:
   - pip3 install -r requirements.txt
+  - pip3 install coveralls
 script:
   - python3 -V
   - python3 -m py_compile ci_tests.py configs.py slides.py telescreen.py wikipedia_source.py
   - python3 telescreen.py --headless_test
+  - coverage run --source=./ telescreen.py --headless_test
+after_success:
+  - coveralls
